@@ -49,7 +49,7 @@
       不可激活其他条目: false
     文件: 世界书\变量\[InitVar]世界初始设定
 
-  - 名称: "[mvu_update]变量输出规则"
+  - 名称: "[mvu_update]变量输出格式"
     启用: true
     激活策略:
       类型: 蓝灯
@@ -62,7 +62,7 @@
     递归:
       不可被其他条目激活: true
       不可激活其他条目: true
-    文件: 世界书\变量\[mvu_update]变量输出规则
+    文件: 世界书\变量\[mvu_update]变量输出格式
 
   - 名称: "[mvu_update]变量更新规则"
     启用: true
@@ -109,7 +109,7 @@
       不可激活其他条目: true
     文件: 世界书\变量\[mvu_update]output_format_(使用额外模型更新变量开)
 
-  - 名称: "variables"
+  - 名称: "变量列表"
     启用: true
     激活策略:
       类型: 蓝灯
@@ -122,7 +122,7 @@
     递归:
       不可被其他条目激活: true
       不可激活其他条目: true
-    文件: 世界书\变量\variables
+    文件: 世界书\变量\变量列表
 
   - 名称: debug
     启用: false
@@ -896,7 +896,7 @@
                 .detail-value { font-size: 0.95rem; line-height: 1.6; background-color: var(--container-bg); padding: 10px; border-left: 2px solid var(--accent); color: var(--text-primary); }
                 .rank-value { font-style: italic; background-color: rgba(91, 192, 222, 0.1); }
                 .hidden-input-area { display: none; }
-                
+
                 .quantity-selector { display: flex; align-items: center; gap: 10px; }
                 .quantity-btn { background-color: var(--container-bg); border: 1px solid var(--border-color); color: var(--text-primary); width: 30px; height: 30px; font-size: 1.2rem; cursor: pointer; }
                 .quantity-input { width: 50px; text-align: center; background-color: var(--background); border: 1px solid var(--border-color); color: var(--text-primary); height: 30px; }
@@ -1036,11 +1036,11 @@
                             showError();
                         }
                     }
-                    
+
                     function parseSupplyItems(data) {
                         let contentToParse = data;
                         const mspContentMatch = data.match(/<MSP>([\s\S]+?)<\/MSP>/);
-                        
+
                         if (mspContentMatch) {
                             contentToParse = mspContentMatch[1];
                         }
@@ -1051,7 +1051,7 @@
 
                         while ((match = itemRegex.exec(contentToParse)) !== null) {
                             const [, supply, sort, price, unit, info, rank] = match.map(s => s ? s.trim() : s);
-                            
+
                             const originalSort = sort || '其他';
                             const categoryKey = mapSortToCategoryKey(originalSort);
                             const priceValue = parseFloat(price.replace(/[^0-9.-]+/g,"")) || 0;
@@ -1110,7 +1110,7 @@
                             itemListContainer.appendChild(card);
                         });
                     }
-                    
+
                     function displayItemDetail(item) {
                         detailPlaceholder.style.display = 'none';
                         detailError.style.display = 'none';
@@ -1140,7 +1140,7 @@
                                 <div class="detail-value">${item.info}</div>
                             </div>
                             <div class="detail-section">
-                                <div class="detail-label">兑换要求</div> 
+                                <div class="detail-label">兑换要求</div>
                                 <div class="detail-value rank-value">${item.rank}</div>
                             </div>
                             <div class="detail-section">
@@ -1230,7 +1230,7 @@
                         }
                         renderCart();
                     }
-                    
+
                     function setupCategoryFilters() {
                         const categoryButtons = document.querySelectorAll('.category-btn');
                         categoryButtons.forEach(button => {
@@ -1264,7 +1264,7 @@
                         detailPlaceholder.style.display = 'none';
                         detailError.style.display = 'block';
                     }
-                    
+
                     function decodeHtml(html) {
                         var txt = document.createElement("textarea");
                         txt.innerHTML = html;
@@ -1289,7 +1289,7 @@
                                 const priceParts = item.price.split('/');
                                 unitString = priceParts.length > 1 ? priceParts[1] : '份';
                             }
-                            
+
                             const unitMatch = unitString.match(/^(\d*\.?\d+)(.*)$/);
                             if (unitMatch) {
                                 const unitValue = parseFloat(unitMatch[1]);
@@ -1300,7 +1300,7 @@
                                 return `${item.supply}，${item.quantity}${unitString}`;
                             }
                         });
-                        
+
                         const checkoutMessage = `花费${currentTotalCost.toFixed(2)}MP，购买清单：${itemsParts.join('；')}。`;
 
                         if (typeof triggerSlash !== 'undefined') {
@@ -1356,7 +1356,7 @@
                 :root {
                     --background: #1a1a1a; --container-bg: #222; --card-bg: #2c2c2c; --card-hover-bg: #383838;
                     --text-primary: #e0e0e0; --text-secondary: #a0a0a0; --accent: #00aaff; --border-color: #444;
-                    
+
                     /* Rarity & Stat Colors */
                     --rank-S: #ffd700; /* Gold */
                     --rank-A: #9b59b6; /* Purple */
@@ -1375,7 +1375,7 @@
                 header { text-align: center; padding-bottom: 20px; border-bottom: 2px solid var(--accent); width: 100%; }
                 h1 { font-size: 2rem; letter-spacing: 2px; color: var(--accent); }
                 .header-subtitle { font-size: 1rem; margin-top: 5px; color: var(--text-secondary); }
-                
+
                 .main-display { width: 100%; }
 
                 .doll-list-wrapper { width: 100%; display: flex; flex-direction: column; align-items: center; }
@@ -1405,7 +1405,7 @@
                     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
                 }
                 .doll-card:hover { background-color: var(--card-hover-bg); }
-                .doll-card.active { 
+                .doll-card.active {
                     border-color: var(--glow-color, var(--accent));
                     box-shadow: 0 0 20px rgba(var(--glow-rgb), 0.5);
                 }
@@ -1442,7 +1442,7 @@
                 .detail-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
                 .detail-code { font-size: 2rem; }
                 .detail-rare { font-size: 1.5rem; font-weight: bold; padding: 5px 15px; border-radius: 5px; }
-                
+
                 .detail-section { display: flex; flex-direction: column; gap: 8px; }
                 .detail-label { font-size: 0.9rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
                 .detail-value { font-size: 1rem; line-height: 1.6; background-color: var(--card-bg); padding: 12px; border-radius: 4px; }
@@ -1578,7 +1578,7 @@
 
                     function initialize(rawData) {
                         const allDolls = parseDolls(rawData);
-                        
+
                         // Data is ready, wait for user interaction to reveal
                         curtainWrapper.addEventListener('click', () => {
                             curtainWrapper.classList.add('reveal');
@@ -1637,7 +1637,7 @@
 
                             const rarity = doll.rare.toUpperCase();
                             const rarityInfo = rankStyles[rarity] || { color: 'var(--text-secondary)', name: rarity };
-                            
+
                             // Function to convert hex to rgb values for the glow
                             const hexToRgb = (hex) => {
                                 let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -1658,7 +1658,7 @@
 
                             card.addEventListener('click', () => {
                                 const wasActive = card.classList.contains('active');
-                                
+
                                 // Close all cards
                                 document.querySelectorAll('.doll-card').forEach(c => {
                                     c.classList.remove('active');
@@ -1887,7 +1887,7 @@
                   </p>
                 </div>
               </details>
-              
+
               <details>
                 <summary>// 纳米尘 <span class="arrow-toggle">></span></summary>
                 <div class="info-content">
@@ -2093,9 +2093,9 @@
 
               /* --- Theme: Dominator (主宰级) - --- */
               .theme-dominator {
-                --bg-color: #1c1c1e; 
+                --bg-color: #1c1c1e;
                 --border-color: #38383a;
-                --border-highlight: #0a84ff; 
+                --border-highlight: #0a84ff;
                 --text-primary: #ffffff;
                 --text-secondary: #8e8e93;
                 --text-header: #ffffff;
@@ -2103,7 +2103,7 @@
                 --accent-warning: #ff9f0a;
                 --accent-danger: #ff453a;
                 --accent-bond: #af52de;
-                --section-bg: #2c2c2e; 
+                --section-bg: #2c2c2e;
                 --progress-bar-bg: #3a3a3c;
                 --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
                 --border-radius: 0;
@@ -2160,7 +2160,7 @@
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: transparent; 
+                background: transparent;
                 pointer-events: none;
                 z-index: 1;
               }
@@ -2397,8 +2397,8 @@
               .sort-controls {
                 display: flex;
                 gap: 8px;
-                padding-left: 0; 
-                margin-bottom: 10px; 
+                padding-left: 0;
+                margin-bottom: 10px;
                 justify-content: flex-start;
               }
               .sort-btn {
@@ -2825,7 +2825,7 @@
               <div class="upgrade-modal-content">
                 <span class="upgrade-modal-close" id="upgrade-modal-close-btn">&times;</span>
                 <h2 style="color: var(--text-header);">设施升级</h2>
-                
+
                 <div class="upgrade-section">
                   <h3 style="color: var(--text-header);">舰内资源</h3>
                   <div id="upgrade-resource-list" class="section-content">
@@ -2883,7 +2883,7 @@
               <div class="interaction-modal-content">
                 <span class="upgrade-modal-close" id="interaction-modal-close-btn">&times;</span>
                 <h2 style="color: var(--text-header);">与人形互动</h2>
-                
+
                 <div class="upgrade-section">
                   <h3 style="color: var(--text-header);">选择互动人形 (可多选)</h3>
                   <div id="interaction-doll-list" class="interaction-doll-list section-content">
@@ -3098,7 +3098,7 @@
 
                 for (const facilityName in facilities) {
                     if (!facilities.hasOwnProperty(facilityName) || facilityName === '$meta') continue;
-                    
+
                     const level = parseInt(SafeGetValue(facilities[facilityName], '等级', '1'), 10);
                     const nextLevel = level + 1;
 
@@ -3133,10 +3133,10 @@
                 const costList = document.getElementById('upgrade-cost-list');
                 const warning = document.getElementById('upgrade-resource-warning');
                 const confirmBtn = document.getElementById('upgrade-confirm-execute-btn');
-                
+
                 const nextLevel = currentLevel + 1;
                 text.innerText = `确定要将 ${facilityName} 升级到 Lv.${nextLevel} 吗?`;
-                
+
                 const costs = upgradeCosts[facilityName]?.[nextLevel];
                 if (!costs) {
                     costList.innerHTML = '<span>无法获取升级成本信息。</span>';
@@ -3173,7 +3173,7 @@
                 }
 
                 confirmBtn.onclick = () => executeUpgrade(facilityName, nextLevel, costs);
-                
+
                 // Hide the main facility list and show the confirmation dialog
                 document.getElementById('upgrade-facility-list').style.display = 'none';
                 dialog.style.display = 'block';
@@ -3191,7 +3191,7 @@
                         costParts.push(`${costs[resource]}数量的${resource}`);
                     }
                 }
-                
+
                 const costString = costParts.join('，');
                 const narrative = `使用了${costString}，将${facilityName}升级到Lv${newLevel}`;
                 const commandToSend = `/send ${narrative}|/trigger`;
@@ -3449,7 +3449,7 @@
                     `;
                     contentEl.appendChild(itemEl);
                 }
-                
+
                 // Only append the section if it has actual items to show
                 if (contentEl.children.length > 0) {
                     if (insertBeforeElement) {
@@ -3605,7 +3605,7 @@
                     missionElement.classList.add('property');
                     missionElement.style.cssText =
                       "grid-template-columns: 1fr; grid-template-areas: 'name' 'value'; gap: 8px; border-top: 1px solid var(--border-color); padding-top: 10px;";
-                    
+
                     const typeColor = missionType === '主线' ? 'var(--accent-danger)' : 'var(--accent-bond)';
 
                     missionElement.innerHTML = `
@@ -3676,7 +3676,7 @@
                   if (missionsObject && typeof missionsObject === 'object') {
                     for (const key in missionsObject) {
                       if (!missionsObject.hasOwnProperty(key) || key === '$meta') continue;
-                      
+
                       let singleTaskData = missionsObject[key];
                       if (singleTaskData && Array.isArray(singleTaskData)) {
                         singleTaskData = singleTaskData[0];
@@ -3687,11 +3687,11 @@
                       }
                     }
                   }
-                  
+
                   // Dynamically create filter buttons
                   const filterControls = document.getElementById('mission-filter-controls');
                   const missionTypes = ['all', ...new Set(missionCache.map(m => SafeGetValue(m, '任务类型', '')).filter(t => t))];
-                  
+
                   if (!missionTypes.includes(currentMissionFilter)) {
                       currentMissionFilter = 'all';
                   }
@@ -3737,7 +3737,7 @@
                         const logEntry = document.createElement('div');
                         // Add a border to all but the first entry
                         const headerStyle = isFirst ? 'margin-top: 0; padding-top: 0; border-top: none;' : 'border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 10px;';
-                        
+
                         logEntry.innerHTML = `
                             <div class="doll-header" onclick="toggleDollDetails(this)" style="${headerStyle}">${logTitles[key]}</div>
                             <div class="doll-content" style="padding: 10px 5px; display: none;">
@@ -3833,7 +3833,7 @@
                       statusGrid,
                       shipSection
                   );
-                  
+
                   // 2. Create Armaments section second, so it appears before the Hangar.
                   createExpandableItemSection(
                       `陆行舰载武装 (${armamentsCount} / ${armamentCap})`,
@@ -3890,10 +3890,10 @@
                           <div class="section-content" style="display: none; gap: 10px; padding-left: 10px;"></div>
                         `;
                         const armoryContentEl = armoryContainer.querySelector('.section-content');
-                        
+
                         for (const weaponKey in armoryData) {
                           if (!armoryData.hasOwnProperty(weaponKey) || weaponKey === '$meta') continue;
-                          
+
                           const weapon = armoryData[weaponKey];
                           const weaponName = SafeGetValue(weapon, '名称', '未知武器');
                           const weaponType = SafeGetValue(weapon, '类型', 'N/A');
@@ -3927,10 +3927,10 @@
                           <div class="section-content" style="display: none; gap: 10px; padding-left: 10px;"></div>
                         `;
                         const specialItemsContentEl = specialItemsContainer.querySelector('.section-content');
-                        
+
                         for (const itemKey in specialItemsData) {
                           if (!specialItemsData.hasOwnProperty(itemKey) || itemKey === '$meta' || SafeGetValue(specialItemsData[itemKey], '名称', '') === '') continue;
-                          
+
                           const item = specialItemsData[itemKey];
                           const itemName = SafeGetValue(item, '名称', '未知物品');
                           const itemType = SafeGetValue(item, '类型', 'N/A');
@@ -4045,7 +4045,7 @@
                 document.getElementById('confirmation-modal-text').innerText = text;
 
                 const confirmBtn = document.getElementById('confirmation-modal-confirm-btn');
-                
+
                 // Clone and replace the button to remove old event listeners
                 const newConfirmBtn = confirmBtn.cloneNode(true);
                 confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
@@ -4087,12 +4087,12 @@
                         dollItem.dataset.dollName = dollName;
                         dollListContainer.appendChild(dollItem);
                     });
-                } 
-                
+                }
+
                 if (!hasDolls) {
                     dollListContainer.innerHTML = '<p>无可用人形。</p>';
                 }
-                
+
                 modal.style.display = 'block';
               }
 
@@ -4114,11 +4114,11 @@
                 let hasItems = false;
                 for (const key in items) {
                     if (!items.hasOwnProperty(key) || key === '$meta') continue;
-                    
+
                     const item = items[key];
                     const itemName = SafeGetValue(item, '名称', null);
                     if (!itemName || itemName.trim() === '') continue;
-                    
+
                     hasItems = true;
                     const itemButton = document.createElement('button');
                     itemButton.className = 'action-button';
@@ -4126,11 +4126,11 @@
                     itemButton.dataset.itemName = itemName;
                     listContainer.appendChild(itemButton);
                 }
-                
+
                 if (!hasItems) {
                     listContainer.innerHTML = '<p>无可用武装。</p>';
                 }
-                
+
                 modal.style.display = 'block';
               }
 
@@ -4150,11 +4150,11 @@
                 let hasItems = false;
                 for (const key in items) {
                     if (!items.hasOwnProperty(key) || key === '$meta') continue;
-                    
+
                     const item = items[key];
                     const itemName = SafeGetValue(item, '名称', null);
                     if (!itemName || itemName.trim() === '') continue;
-                    
+
                     hasItems = true;
                     const itemButton = document.createElement('button');
                     itemButton.className = 'action-button';
@@ -4162,11 +4162,11 @@
                     itemButton.dataset.itemName = itemName;
                     listContainer.appendChild(itemButton);
                 }
-                
+
                 if (!hasItems) {
                     listContainer.innerHTML = '<p>无可用载具。</p>';
                 }
-                
+
                 modal.style.display = 'block';
               }
 
@@ -4186,7 +4186,7 @@
                 const closeUpgradeBtn = document.getElementById('upgrade-modal-close-btn');
                 if(openUpgradeBtn) openUpgradeBtn.addEventListener('click', openUpgradeModal);
                 if(closeUpgradeBtn) closeUpgradeBtn.addEventListener('click', closeUpgradeModal);
-                
+
                 // AI Query Modal
                 const aiQueryModal = document.getElementById('ai-query-modal');
                 const openAiQueryBtn = document.getElementById('ask-ai-btn');
@@ -4234,7 +4234,7 @@
                         if (event.target.matches('.action-button')) {
                             const selectedDolls = Array.from(document.querySelectorAll('.interaction-doll-item.selected'))
                                                        .map(item => item.dataset.dollName);
-                            
+
                             if (selectedDolls.length === 0) {
                                 alert('请至少选择一个人形。');
                                 return;
@@ -4302,7 +4302,7 @@
 
                 if (openArmamentsBtn) openArmamentsBtn.addEventListener('click', openArmamentsModal);
                 if (closeArmamentsBtn) closeArmamentsBtn.addEventListener('click', closeArmamentsModal);
-                
+
                 if (armamentsList) {
                     armamentsList.addEventListener('click', (event) => {
                         if (event.target.matches('.action-button')) {
@@ -5071,7 +5071,7 @@
               };
 
               // 权重和加成定义
-              
+
               const weaponLevelBonus = 150; // 每级武装等级提供的战力加成
               const abilityWeights = {
                   '战术执行力': 5,
@@ -5089,7 +5089,7 @@
               // 4. 计算各部分分数
               const rarityScore = rarityMap[rarity] || 0;
               const weaponScore = parseInt(weaponLevel, 10) * weaponLevelBonus;
-              
+
               let abilitiesScore = 0;
               for (const abilityName in abilities) {
                   if (abilityWeights.hasOwnProperty(abilityName)) {
@@ -5215,7 +5215,7 @@
                           } else {
                               currentObj[key] = correctedValue;
                           }
-                          
+
                           const displayName = newPath.join('.');
                           displayChanges.push(`${displayName}从${oldValue}修正为0(防止负值)`);
                           madeChanges = true;
