@@ -19,7 +19,7 @@ variables_update_rules:
   纳米尘污染等级:
     format: ${污染等级}(${等级描述})
     check:
-      - 随<user>区域纳米尘污染程度变化更新
+      - 随<user>所在区域的纳米尘污染程度变化更新
   任务列表:
     type: |-
       {
@@ -57,7 +57,7 @@ variables_update_rules:
         - 随<user>完成任务更新
     属性.${四维}:
       type: number
-      五维: 交涉 | 指挥 | 瞄准 | 智力
+      四维: 交涉 | 指挥 | 瞄准 | 智力
       check:
         - 单次变化应有明确的剧情依据
     技能:
@@ -82,6 +82,7 @@ variables_update_rules:
       type: |-
         {
           [陆巡舰名称: string]: {
+            陆巡舰等级: string;
             设施最大数量: number;
             设施等级上限: number;
             武器上限: number;
@@ -152,26 +153,40 @@ variables_update_rules:
           }
         check:
           - 获取、装备、丢弃物品更新
-  人形列表:
-    type: |-
-      {
-        [代号: string]: {
-          稀有度: string;
-          精神负荷: number;
-          羁绊深度: number;
-          外貌: string;
-          着装: string;
-          性格: string;
-          作战风格: string;
-          战损程度: string;
-          装备: { [装备名: string]: { 等级: string; 类型: string; 效果: { [k: string]: string }; 描述: string; 位置: string } };
-          技能: { [技能名: string]: { 等级: string; 类型: string; 消耗: string; 效果: { [k: string]: string }; 描述: string } };
-          能力: { 战术执行力: string; 素体韧性: string; 心智稳定度: string; 环境适应性: string; 成长潜质: string };
+  角色列表:
+    关系列表:
+      type: |-
+        {
+          [名字: string]: {
+            身份: string;
+            好感: number;
+            外貌: string;
+            着装: string;
+            性格: string;
+          }
         }
-      }
-    check:
-      - 角色名称必须使用唯一、完整、正式的名称
-      - 随人员调动更新
+      check:
+        - 随<user>与其他角色互动更新
+    人形列表:
+      type: |-
+        {
+          [代号: string]: {
+            稀有度: string;
+            精神负荷: number;
+            好感: number;
+            外貌: string;
+            着装: string;
+            性格: string;
+            作战风格: string;
+            战损程度: string;
+            装备: { [装备名: string]: { 等级: string; 类型: string; 效果: { [k: string]: string }; 描述: string; 位置: string } };
+            技能: { [技能名: string]: { 等级: string; 类型: string; 消耗: string; 效果: { [k: string]: string }; 描述: string } };
+            能力: { 战术执行力: string; 素体韧性: string; 心智稳定度: string; 环境适应性: string; 成长潜质: string };
+          }
+        }
+      check:
+        - 角色名称必须使用唯一、完整、正式的名称
+        - 随人员调动更新
   资讯:
     舰上信息:
       type: |-
