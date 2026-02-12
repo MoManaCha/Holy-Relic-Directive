@@ -1,0 +1,2355 @@
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SRB 远征单位状态终端</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
+
+      :root {
+        /* Default Typography */
+        --font-family: 'Share Tech Mono', 'Courier New', monospace;
+        --font-size-base: 15px;
+        --font-size-lg: 1.2em;
+        --font-size-sm: 0.9em;
+        --border-radius: 0;
+      }
+
+      /* --- Theme: Pioneer (拓荒者级) --- */
+      .theme-pioneer {
+        --bg-color: #1a1a1a;
+        --border-color: #4a4a4a;
+        --border-highlight: #8a6d3b;
+        --text-primary: #ffc107;
+        --text-secondary: #a07d2c;
+        --text-header: #ffecb3;
+        --accent-highlight: #ffc107;
+        --accent-warning: #f0ad4e;
+        --accent-danger: #d9534f;
+        --accent-bond: #8fbc8f;
+        --section-bg: rgba(40, 40, 40, 0.5);
+        --progress-bar-bg: #000;
+        --font-family: 'Share Tech Mono', 'Courier New', monospace;
+      }
+      .theme-pioneer .status-display::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: repeating-linear-gradient(
+          0deg,
+          rgba(0, 0, 0, 0.3) 0px,
+          rgba(0, 0, 0, 0.3) 1px,
+          transparent 1px,
+          transparent 3px
+        );
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      /* --- Theme: Expedition (远征军级) --- */
+      .theme-expedition {
+        --bg-color: #1c252e;
+        --border-color: #3a506b;
+        --border-highlight: #5bc0de;
+        --text-primary: #e0e0e0;
+        --text-secondary: #88a2be;
+        --text-header: #ffffff;
+        --accent-highlight: #5bc0de;
+        --accent-warning: #f0ad4e;
+        --accent-danger: #d9534f;
+        --accent-bond: #62c462;
+        --section-bg: rgba(28, 37, 46, 0.7);
+        --progress-bar-bg: #10151a;
+        --font-family: 'Share Tech Mono', 'Courier New', monospace;
+        --border-radius: 0;
+      }
+
+      /* --- Theme: Dominator (主宰级) - --- */
+      .theme-dominator {
+        --bg-color: #1c1c1e;
+        --border-color: #38383a;
+        --border-highlight: #0a84ff;
+        --text-primary: #ffffff;
+        --text-secondary: #8e8e93;
+        --text-header: #ffffff;
+        --accent-highlight: #0a84ff;
+        --accent-warning: #ff9f0a;
+        --accent-danger: #ff453a;
+        --accent-bond: #af52de;
+        --section-bg: #2c2c2e;
+        --progress-bar-bg: #3a3a3c;
+        --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        --border-radius: 0;
+      }
+      .theme-dominator .status-display {
+        box-shadow: none;
+        border-width: 1px;
+        border-color: #38383a;
+      }
+      .theme-dominator .section {
+        border-width: 1px;
+        box-shadow: none;
+        background-color: var(--section-bg);
+      }
+      .theme-dominator .facility-container {
+        background-color: #3a3a3c;
+        border-radius: 0;
+      }
+      .theme-dominator .facility-description {
+        background-color: #1c1c1e;
+        border-radius: 0;
+      }
+      .theme-dominator .facility-container:hover {
+        background-color: #48484a;
+      }
+
+      body {
+        font-family: var(--font-family);
+        background-color: transparent;
+        color: var(--text-primary);
+        margin: 0;
+        padding: 20px;
+        font-size: var(--font-size-base);
+        font-weight: 400;
+      }
+
+      .status-display {
+        background-color: var(--bg-color);
+        border: 3px solid var(--border-color);
+        border-top-color: var(--border-highlight);
+        border-left-color: var(--border-highlight);
+        border-radius: var(--border-radius);
+        padding: 20px;
+        box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* Scanline effect */
+      .status-display::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      .display-header {
+        text-align: center;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+        border-bottom: 2px solid var(--border-color);
+      }
+
+      .display-header h2 {
+        margin: 0;
+        font-weight: 400;
+        font-size: 1.8em;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: var(--text-header);
+      }
+
+      .sub-header-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+        border-bottom: 1px dashed var(--border-color);
+        color: var(--text-secondary);
+        font-size: var(--font-size-sm);
+      }
+      .sub-header-info span > span {
+        color: var(--text-primary);
+        font-weight: 400;
+        font-size: var(--font-size-base);
+      }
+
+      .status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+      }
+
+      /* Widescreen layout - 2 columns */
+      @media (min-width: 1150px) {
+        .status-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      .section {
+        background-color: var(--section-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 400;
+        font-size: 1.3em;
+        color: var(--text-header);
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 5px;
+      }
+      .section-header.clickable {
+        cursor: pointer;
+      }
+
+      .section-content {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .property {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto auto;
+        grid-template-areas:
+          'name value'
+          'progress progress';
+        align-items: center;
+        gap: 4px 10px;
+      }
+
+      .property-name {
+        grid-area: name;
+        font-weight: 400;
+        color: var(--text-secondary);
+        font-size: var(--font-size-sm);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      #ship-details .property-name,
+      #resources-details .property-name {
+        border: 1px solid var(--border-color);
+        background-color: rgba(0, 0, 0, 0.3);
+        padding: 8px 12px;
+        border-radius: 2px;
+        color: var(--text-primary);
+        align-self: start;
+        justify-self: start;
+      }
+
+      .property-value-container {
+        grid-area: value;
+        display: flex;
+        justify-content: flex-end;
+        align-items: baseline;
+        gap: 10px;
+        text-align: right;
+      }
+
+      .value-main {
+        font-size: var(--font-size-lg);
+        font-weight: 400;
+        color: var(--text-header);
+      }
+
+      .ship-resources-section .value-main {
+        font-size: 1.4em;
+      }
+      .ship-resources-section .property-name {
+        font-size: 1.1em;
+      }
+
+      .value-description {
+        font-size: var(--font-size-sm);
+        color: var(--accent-highlight);
+        font-weight: 400;
+        white-space: nowrap;
+      }
+
+      .text-wrap {
+        white-space: normal;
+        overflow-wrap: break-word;
+      }
+
+      .progress-bar-container {
+        grid-area: progress;
+        background-color: var(--progress-bar-bg);
+        border: 1px solid var(--border-color);
+        height: 6px;
+        width: 100%;
+        overflow: hidden;
+        margin-top: 4px;
+        padding: 1px;
+      }
+
+      .progress-bar-value {
+        height: 100%;
+        background-color: var(--accent-highlight);
+        width: 0%;
+        transition: width 0.5s ease-in-out, background-color 0.5s ease-in-out;
+        box-shadow: none;
+      }
+
+      #doll-bond-bar {
+        background-color: var(--accent-bond);
+      }
+
+      .facility-container {
+        background-color: var(--section-bg);
+        padding: 10px 15px;
+        cursor: pointer;
+        transition: background-color 0.2s ease-in-out;
+        border: none;
+        border-radius: var(--border-radius);
+        box-shadow: inset 0 0 0 1px rgba(128, 128, 128, 0.2);
+      }
+      .facility-container:hover {
+        background-color: rgba(128, 128, 128, 0.1);
+      }
+      .theme-pioneer .facility-container:hover {
+        background-color: rgba(255, 193, 7, 0.1);
+      }
+      .theme-expedition .facility-container:hover {
+        background-color: rgba(91, 192, 222, 0.15);
+      }
+      .theme-dominator .facility-container:hover {
+        background-color: #48484a;
+      }
+      .facility-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .facility-description, .item-description {
+        display: none;
+        margin-top: 10px;
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        background-color: rgba(0, 0, 0, 0.2);
+        color: var(--text-secondary);
+        font-size: var(--font-size-sm);
+        white-space: normal;
+        overflow-wrap: break-word;
+        grid-column: 1 / -1;
+      }
+      .doll-header {
+        cursor: pointer;
+        border-top: 1px solid var(--border-color);
+        padding-top: 15px;
+        margin-top: 10px;
+        color: var(--text-header);
+      }
+      .doll-content {
+        display: none;
+      }
+      .action-button {
+        background-color: var(--section-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        padding: 5px 10px;
+        cursor: pointer;
+        font-family: var(--font-family);
+        transition: background-color 0.2s;
+        border-radius: var(--border-radius);
+        font-size: var(--font-size-sm);
+      }
+      .action-button:hover {
+        background-color: var(--border-color);
+        color: var(--text-header);
+      }
+
+      .sort-controls {
+        display: flex;
+        gap: 8px;
+        padding-left: 0;
+        margin-bottom: 10px;
+        justify-content: flex-start;
+      }
+      .sort-btn {
+        background-color: rgba(0,0,0,0.3);
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        padding: 2px 8px;
+        cursor: pointer;
+        font-family: var(--font-family);
+        transition: all 0.2s;
+        border-radius: var(--border-radius);
+        font-size: 0.8em;
+      }
+      .sort-btn:hover {
+        background-color: var(--border-color);
+        color: var(--text-header);
+      }
+      .sort-btn.active {
+        background-color: var(--accent-highlight);
+        color: var(--bg-color);
+        border-color: var(--accent-highlight);
+      }
+
+      /* Responsive adjustments for smaller screens */
+      @media (max-width: 600px) {
+        body {
+          padding: 10px;
+          --font-size-base: 14px;
+        }
+        .status-display {
+          padding: 15px;
+        }
+        .display-header h2 {
+          font-size: 1.5em;
+          letter-spacing: 2px;
+        }
+        .actions-container {
+            flex-wrap: wrap;
+        }
+      }
+
+      /* More aggressive adjustments for very narrow screens */
+      @media (max-width: 420px) {
+        body {
+          padding: 5px;
+          --font-size-base: 13px;
+        }
+        .status-display {
+          padding: 10px;
+        }
+        .status-grid {
+          grid-template-columns: 1fr;
+          gap: 15px;
+        }
+        .value-description {
+          white-space: normal; /* Allow wrapping */
+        }
+        .property-value-container {
+          gap: 5px;
+        }
+      }
+
+      /* Upgrade Modal Styles */
+      .upgrade-modal {
+        display: none;
+        position: fixed;
+        z-index: 100;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: #FFF; /* Fallback color */
+      }
+      .upgrade-modal-content {
+        background-color: #2c2c2e; /* Solid background color */
+        margin: 5% auto;
+        padding: 20px;
+        border: 2px solid var(--border-highlight);
+        width: 80%;
+        max-width: 800px;
+        position: relative;
+        font-family: var(--font-family);
+        color: #FFFFFF; /* Solid text color */
+      }
+      .upgrade-modal-close {
+        color: var(--text-secondary);
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      .upgrade-modal-close:hover,
+      .upgrade-modal-close:focus {
+        color: var(--text-header);
+      }
+      .upgrade-section {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--border-color);
+      }
+       .upgrade-facility-row:last-child {
+        border-bottom: none;
+      }
+      .upgrade-cost {
+        font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+      }
+      .upgrade-confirm-btn {
+        background-color: var(--accent-warning);
+        color: var(--bg-color);
+      }
+      .upgrade-confirm-btn:disabled {
+        background-color: var(--border-color);
+        cursor: not-allowed;
+      }
+      #upgrade-resource-list div, #upgrade-facility-list span {
+        color: #FFFFFF !important; /* Force white text color */
+      }
+      .upgrade-button-wrapper {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 15px;
+      }
+      .upgrade-button-wrapper .action-button {
+        border: 1px solid white;
+      }
+      #upgrade-confirm-execute-btn {
+        border: 1px solid white;
+        font-weight: bold;
+      }
+
+      /* --- Enhanced Upgrade Modal Styles --- */
+      .upgrade-modal-content {
+        background: #1c1c1e;
+        border: 1px solid var(--border-highlight);
+        box-shadow: 0 0 25px rgba(0, 0, 0, 0.5);
+        border-radius: var(--border-radius);
+      }
+      .upgrade-section h3 {
+        font-family: 'Orbitron', sans-serif;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-size: 1.1em;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 10px;
+      }
+      #upgrade-resource-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 8px;
+        font-size: var(--font-size-sm);
+      }
+      #upgrade-resource-list div {
+        background-color: var(--section-bg);
+        padding: 5px 10px;
+        border-radius: var(--border-radius);
+        border: 1px solid var(--border-color);
+      }
+      .upgrade-facility-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        padding: 12px;
+        background-color: rgba(0,0,0,0.2);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        transition: all 0.2s ease-in-out;
+      }
+      .upgrade-facility-row:not(:last-child) {
+        margin-bottom: 10px;
+      }
+      .upgrade-facility-row.clickable:hover {
+        background-color: rgba(255, 193, 7, 0.1);
+        border-color: var(--accent-warning);
+        cursor: pointer;
+      }
+      .facility-info {
+        flex-grow: 1;
+      }
+      .facility-info-name {
+        font-size: var(--font-size-lg);
+        color: var(--text-header);
+        font-weight: bold;
+      }
+      .facility-info-level {
+        font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+      }
+      .max-level-text {
+        color: var(--accent-bond);
+        font-weight: bold;
+        text-align: right;
+      }
+      #ai-query-list .query-item {
+          padding: 10px 15px;
+          background-color: transparent;
+          border: 1px solid white;
+          cursor: pointer;
+          transition: background-color 0.2s, color 0.2s;
+          border-radius: var(--border-radius);
+          margin-bottom: 10px;
+          color: white;
+      }
+
+      #ai-query-list .query-item:hover {
+          background-color: white;
+          color: black;
+      }
+
+      /* Interaction Modal Styles */
+      .interaction-modal-content {
+        background-color: #2c2c2e;
+        margin: 5% auto;
+        padding: 20px;
+        border: 2px solid var(--border-highlight);
+        width: 80%;
+        max-width: 600px;
+        position: relative;
+        font-family: var(--font-family);
+        color: #FFFFFF;
+      }
+      .interaction-doll-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding-top: 10px;
+        margin-bottom: 20px;
+      }
+      .interaction-doll-item {
+        border: 1px solid var(--border-color, #4a4a4a);
+        padding: 8px 15px;
+        cursor: pointer;
+        transition: background-color 0.2s, color 0.2s;
+        border-radius: var(--border-radius, 0);
+        user-select: none; /* Prevent text selection */
+        color: var(--text-primary, #ffc107);
+      }
+      .interaction-doll-item:hover {
+        background-color: var(--border-color, #4a4a4a);
+        color: var(--text-header, #ffecb3);
+      }
+      .interaction-doll-item.selected {
+        background-color: var(--accent-highlight, #ffc107);
+        color: var(--bg-color, #1a1a1a) !important;
+        border-color: var(--accent-highlight, #ffc107);
+        font-weight: bold;
+      }
+      .interaction-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
+      }
+      .interaction-actions .action-button {
+        justify-content: center;
+        text-align: center;
+        border: 1px solid var(--border-color, #4a4a4a) !important; /* Explicitly add border */
+        background-color: transparent;
+      }
+      .interaction-actions .action-button:hover {
+        background-color: var(--border-color, #4a4a4a);
+        color: var(--text-header, #ffecb3);
+      }
+      .interaction-actions .action-button.selected {
+        background-color: var(--accent-highlight, #ffc107);
+        color: var(--bg-color, #1a1a1a) !important;
+        border-color: var(--accent-highlight, #ffc107);
+        font-weight: bold;
+      }
+      .interaction-actions .action-button.selected {
+        background-color: var(--accent-highlight, #ffc107);
+        color: var(--bg-color, #1a1a1a) !important;
+        border-color: var(--accent-highlight, #ffc107);
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="status-display" id="status-display">
+      <div class="sub-header-info">
+        <span>系统时间: <span id="global-time">N/A</span></span>
+        <span>当前位置: <span id="global-location">N/A</span></span>
+        <span>天气: <span id="global-weather">N/A</span></span>
+        <span>纳米尘污染: <span id="global-pollution">N/A</span></span>
+      </div>
+      <div class="actions-container" style="padding-bottom: 15px; margin-bottom: 20px; border-bottom: 1px dashed var(--border-color); display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <button class="action-button" id="msp-supply-btn">获取MSP供应协议</button>
+          <button class="action-button" id="request-doll-btn">使用申请获取人形</button>
+          <button class="action-button" id="upgrade-facility-btn">设施升级</button>
+          <button class="action-button" id="ask-ai-btn">问问舰载AI</button>
+          <button class="action-button" id="interact-doll-btn">与人形互动</button>
+          <button class="action-button" id="armaments-btn">舰载武装</button>
+          <button class="action-button" id="hangar-btn">机库载具</button>
+      </div>
+      <div class="status-grid">
+        <!-- Section 1: Global Info -->
+        <div class="section">
+          <div class="section-header clickable" onclick="toggleSection(this)">SRB信息</div>
+          <div class="section-content" style="display: none">
+            <div class="property">
+              <div class="property-name">功绩点 / 排名</div>
+              <div class="property-value-container">
+                <span class="value-main" id="global-merit">N/A</span>
+              </div>
+            </div>
+            <div class="property">
+              <div class="property-name">指挥官评级</div>
+              <div class="property-value-container">
+                <span class="value-main" id="global-commander-rank">N/A</span>
+              </div>
+            </div>
+            <div
+              class="property"
+              style="
+                grid-template-columns: 1fr;
+                grid-template-areas: 'name' 'value';
+                gap: 8px;
+                border-top: 1px solid var(--border-color);
+                padding-top: 10px;
+              "
+            >
+              <div class="property-name" style="grid-area: name; color: var(--text-header)">SRB公告</div>
+              <div
+                class="property-value-container"
+                style="grid-area: value; justify-content: flex-start; display: block; text-align: left"
+              >
+                <span class="value-description text-wrap" id="srb-announcement" style="color: var(--text-primary)"
+                  >N/A</span
+                >
+              </div>
+            </div>
+            <div
+              class="property"
+              style="
+                grid-template-columns: 1fr;
+                grid-template-areas: 'tabs' 'name' 'value';
+                gap: 8px;
+                border-top: 1px solid var(--border-color);
+                padding-top: 10px;
+              "
+            >
+              <div class="sort-controls" id="mission-filter-controls" style="grid-area: tabs; margin-bottom: 10px;">
+                <button class="sort-btn active" onclick="filterMissions('all', event)">全部</button>
+                <button class="sort-btn" onclick="filterMissions('主线', event)">主线</button>
+                <button class="sort-btn" onclick="filterMissions('支线', event)">支线</button>
+              </div>
+              <div class="property-name" style="grid-area: name; color: var(--text-header);">SRB委派任务</div>
+              <div id="mission-list" style="grid-area: value; display: block; width: 100%;">
+                <!-- Missions will be dynamically inserted here -->
+                <div class="property">
+                  <div class="property-value-container" style="justify-content: flex-start; grid-column: 1 / -1">
+                    <span class="value-main">无</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Doll Status Container -->
+        <div class="section" id="doll-section-container">
+          <div class="section-header clickable" onclick="toggleSection(this)">
+            <span>人形列表</span>
+          </div>
+          <div class="section-content" id="doll-list-content" style="display: none">
+            <!-- This will be populated by JS -->
+          </div>
+        </div>
+
+        <!-- Section 3: Ship Status -->
+        <div class="section">
+          <div class="section-header clickable" id="ship-name-container" onclick="toggleSection(this)">
+            <span id="ship-name">陆行舰</span>
+          </div>
+          <div class="section-content" id="ship-details" style="display: none">
+            <div class="section-header clickable" onclick="toggleSection(this)" style="font-size: 1.1em; border-top: none; padding-top: 0; margin-top: 0; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 5px;">舰上信息</div>
+            <div class="section-content" id="ship-log-content" style="display: none; flex-direction: column; gap: 0px; padding-bottom: 10px; width: 100%;">
+              <!-- Content will be dynamically inserted here by JS -->
+            </div>
+            <div class="property">
+              <div class="property-name">型号</div>
+              <div class="property-value-container">
+                <span class="value-main" id="ship-type">N/A</span>
+              </div>
+            </div>
+            <div class="property">
+              <div class="property-name">设施上限</div>
+              <div class="property-value-container">
+                <span class="value-main" id="ship-facility-cap">N/A</span>
+              </div>
+            </div>
+            <div class="property">
+              <div class="property-name">等级上限</div>
+              <div class="property-value-container">
+                <span class="value-main" id="ship-level-cap">N/A</span>
+              </div>
+            </div>
+            <div class="property">
+              <div class="property-name">舰载AI</div>
+              <div class="property-value-container">
+                <span class="value-main" id="ship-ai">N/A</span>
+              </div>
+            </div>
+            <div class="property">
+              <div class="property-name">能源核心</div>
+              <div class="property-value-container">
+                <span class="value-main" id="ship-core">N/A</span>
+              </div>
+            </div>
+            <!-- Facilities will be dynamically inserted here -->
+            <div id="ship-facilities-list"></div>
+          </div>
+        </div>
+
+        <!-- Dynamic Ship Sections will be inserted here by JS -->
+      </div>
+    </div>
+
+    <!-- Upgrade Modal -->
+    <div id="upgrade-modal" class="upgrade-modal">
+      <div class="upgrade-modal-content">
+        <span class="upgrade-modal-close" id="upgrade-modal-close-btn">&times;</span>
+        <h2 style="color: var(--text-header);">设施升级</h2>
+
+        <div class="upgrade-section">
+          <h3 style="color: var(--text-header);">舰内资源</h3>
+          <div id="upgrade-resource-list" class="section-content">
+            <!-- Resources will be populated here -->
+          </div>
+        </div>
+
+        <div class="upgrade-section">
+          <h3 style="color: var(--text-header);">可升级设施</h3>
+          <div id="upgrade-facility-list">
+            <!-- Facilities will be populated here -->
+          </div>
+        </div>
+
+        <div id="upgrade-confirmation-dialog" class="upgrade-section" style="display: none;">
+            <h3 style="color: var(--text-header);">升级确认</h3>
+            <p id="upgrade-confirmation-text"></p>
+            <div id="upgrade-cost-list"></div>
+            <p id="upgrade-resource-warning" style="color: var(--accent-danger);"></p>
+            <div class="upgrade-button-wrapper">
+              <button class="action-button" onclick="hideUpgradeConfirmation()">返回</button>
+              <button class="action-button upgrade-confirm-btn" id="upgrade-confirm-execute-btn">确认升级</button>
+            </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- AI Query Modal -->
+    <div id="ai-query-modal" class="upgrade-modal">
+      <div class="upgrade-modal-content">
+        <span class="upgrade-modal-close" id="ai-query-modal-close-btn">&times;</span>
+        <h2 style="color: var(--text-header);">问问舰载AI</h2>
+        <div id="ai-query-list" class="section-content" style="display: block; max-height: 400px; overflow-y: auto;">
+          <!-- Questions will be populated here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmation-modal" class="upgrade-modal">
+      <div class="upgrade-modal-content">
+        <span class="upgrade-modal-close" id="confirmation-modal-close-btn">&times;</span>
+        <h2 id="confirmation-modal-title" style="color: var(--text-header);">确认操作</h2>
+        <p id="confirmation-modal-text" style="color: var(--text-primary); font-size: var(--font-size-lg); margin: 20px 0;"></p>
+        <div class="upgrade-button-wrapper">
+          <button class="action-button" id="confirmation-modal-cancel-btn">取消</button>
+          <button class="action-button upgrade-confirm-btn" id="confirmation-modal-confirm-btn">确认</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Doll Interaction Modal -->
+    <div id="interaction-modal" class="upgrade-modal">
+      <div class="interaction-modal-content">
+        <span class="upgrade-modal-close" id="interaction-modal-close-btn">&times;</span>
+        <h2 style="color: var(--text-header);">与人形互动</h2>
+
+        <div class="upgrade-section">
+          <h3 style="color: var(--text-header);">选择互动人形 (可多选)</h3>
+          <div id="interaction-doll-list" class="interaction-doll-list section-content">
+            <!-- Dolls will be populated here -->
+          </div>
+        </div>
+
+        <div class="upgrade-section">
+          <h3 style="color: var(--text-header);">选择互动方式</h3>
+          <div id="interaction-actions" class="interaction-actions">
+            <button class="action-button" data-action="进行日常问候">进行日常问候</button>
+            <button class="action-button" data-action="表达自己的关心">表达自己的关心</button>
+            <button class="action-button" data-action="询问其过往">询问其过往</button>
+            <button class="action-button" data-action="尝试亲密行为">尝试亲密行为</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Armaments Modal -->
+    <div id="armaments-modal" class="upgrade-modal">
+      <div class="interaction-modal-content">
+        <span class="upgrade-modal-close" id="armaments-modal-close-btn">&times;</span>
+        <h2 style="color: var(--text-header);">选择舰载武装</h2>
+        <div class="upgrade-section">
+          <div id="armaments-list" class="interaction-actions">
+            <!-- Armaments will be populated here -->
+          </div>
+        </div>
+        <div class="upgrade-button-wrapper">
+          <button class="action-button" id="armaments-confirm-btn">确认使用</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hangar Modal -->
+    <div id="hangar-modal" class="upgrade-modal">
+      <div class="interaction-modal-content">
+        <span class="upgrade-modal-close" id="hangar-modal-close-btn">&times;</span>
+        <h2 style="color: var(--text-header);">选择机库载具</h2>
+        <div class="upgrade-section">
+          <div id="hangar-list" class="interaction-actions">
+            <!-- Hangar vehicles will be populated here -->
+          </div>
+        </div>
+        <div class="upgrade-button-wrapper">
+          <button class="action-button" id="hangar-confirm-btn">确认出击</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function GetRawValue(obj, path, defaultValue = null) {
+        const keys = Array.isArray(path) ? path : path.split('.');
+        let current = obj;
+        for (let i = 0; i < keys.length; i++) {
+          const key = keys[i];
+          if (
+            current === undefined ||
+            current === null ||
+            typeof current !== 'object' ||
+            !current.hasOwnProperty(key)
+          ) {
+            return defaultValue;
+          }
+          current = current[key];
+        }
+        return current === undefined || current === null ? defaultValue : current;
+      }
+
+      function SafeGetValue(obj, path, defaultValue = 'N/A') {
+        // Path can be a string 'a.b.c' or an array ['a', 'b', 'c']
+        const keys = Array.isArray(path) ? path : path.split('.');
+        let current = obj;
+        for (let i = 0; i < keys.length; i++) {
+          const key = keys[i];
+          if (
+            current === undefined ||
+            current === null ||
+            typeof current !== 'object' ||
+            !current.hasOwnProperty(key)
+          ) {
+            // console.warn(`Path not found: ${path} at key: ${key}`);
+            return defaultValue;
+          }
+          current = current[key];
+        }
+
+        if (current === undefined || current === null) {
+          return defaultValue;
+        }
+
+        // If the value is an array, return the first element (the actual value).
+        if (Array.isArray(current) && current.length > 0) {
+          const actualValue = current[0];
+          return typeof actualValue === 'boolean' ? actualValue : String(actualValue);
+        }
+
+        return typeof current === 'boolean' ? current : String(current);
+      }
+
+      function updateProgressBar(barId, valueMainId, valueDescId, rawValue, min, max, stageMapping) {
+        const progressBar = document.getElementById(barId);
+        const valueMainDisplay = document.getElementById(valueMainId);
+        const valueDescDisplay = document.getElementById(valueDescId);
+
+        if (!valueMainDisplay) return;
+
+        const numericValue = parseFloat(rawValue) || min;
+        valueMainDisplay.innerText = String(rawValue);
+
+        if (valueDescDisplay && stageMapping) {
+          const stage = stageMapping.find(s => numericValue >= s.min && numericValue <= s.max);
+          valueDescDisplay.innerText = stage ? stage.name : '';
+        }
+
+        if (progressBar) {
+          const clampedValue = Math.max(min, Math.min(max, numericValue));
+          const range = max - min;
+          const percentage = range === 0 ? (clampedValue >= max ? 100 : 0) : ((clampedValue - min) / range) * 100;
+          progressBar.style.width = `${percentage}%`;
+
+          if (stageMapping) {
+            const stage = stageMapping.find(s => clampedValue >= s.min && clampedValue <= s.max);
+            if (stage && stage.color) {
+              progressBar.style.backgroundColor = stage.color;
+              // No box-shadow for wasteland theme
+            }
+          }
+        }
+      }
+
+      function updateFacility(baseId, level, maxLevel) {
+        const valueDisplay = document.getElementById(baseId);
+        if (valueDisplay) valueDisplay.innerText = `Lv.${level}`;
+      }
+
+      let statDataCache = null; // Cache for stat_data
+      let missionCache = []; // Cache for missions
+      let currentMissionFilter = 'all'; // 'all', '主线', '支线'
+      let currentSort = {
+        key: 'default',
+        direction: 'asc'
+      };
+
+      // --- Upgrade Logic ---
+      const upgradeCosts = {
+          "舰桥": {
+              2: { "零件": 300, "高精度组件": 10 },
+              3: { "零件": 900, "高精度组件": 90, "结构框架": 40 },
+              4: { "零件": 2200, "高精度组件": 250, "结构框架": 100 },
+              5: { "零件": 5500, "高精度组件": 600, "结构框架": 250, "旧世界数据盘": 20 }
+          },
+          "整备室": {
+              2: { "零件": 250, "标准燃料": 50 },
+              3: { "零件": 600, "高精度组件": 40, "结构框架": 25 },
+              4: { "零件": 1500, "高精度组件": 120, "结构框架": 70 },
+              5: { "零件": 3500, "高精度组件": 300, "结构框架": 150, "旧世界数据盘": 10 }
+          },
+          "冷却槽室": {
+              2: { "零件": 300, "高精度组件": 20, "基础心智冷却液": 5 },
+              3: { "零件": 800, "高精度组件": 80, "结构框架": 30, "基础心智冷却液": 15 },
+              4: { "零件": 2000, "高精度组件": 200, "结构框架": 80, "基础心智冷却液": 40 },
+              5: { "零件": 5000, "高精度组件": 500, "结构框架": 200, "基础心智冷却液": 100, "旧世界数据盘": 15 }
+          },
+          "食堂": {
+              2: { "零件": 100 },
+              3: { "零件": 300, "结构框架": 20, "生物样本": 10 },
+              4: { "零件": 800, "高精度组件": 70, "结构框架": 50 },
+              5: { "零件": 2000, "高精度组件": 180, "结构框架": 120, "旧世界数据盘": 8 }
+          },
+          "圣柩休息室": {
+              2: { "零件": 200, "结构框架": 15 },
+              3: { "零件": 500, "结构框架": 40, "旧世界数据盘": 2 },
+              4: { "零件": 1200, "结构框架": 80, "高精度组件": 60, "旧世界数据盘": 5 },
+              5: { "零件": 2800, "结构框架": 180, "高精度组件": 150, "生物样本": 50 }
+          },
+          "指挥官的房间": {
+              2: { "零件": 150, "结构框架": 10 },
+              3: { "零件": 400, "结构框架": 25, "高精度组件": 15 },
+              4: { "零件": 1000, "结构框架": 60, "高精度组件": 50 },
+              5: { "零件": 2500, "结构框架": 150, "高精度组件": 120, "旧世界数据盘": 5 }
+          },
+          "资源加工站": {
+              2: { "零件": 200, "标准燃料": 100 },
+              3: { "零件": 500, "标准燃料": 250, "高精度组件": 20 },
+              4: { "零件": 1200, "标准燃料": 600, "高精度组件": 80, "结构框架": 30 },
+              5: { "零件": 3000, "标准燃料": 1500, "高精度组件": 200, "结构框架": 100, "旧世界数据盘": 10 }
+          }
+      };
+
+      function openUpgradeModal() {
+        if (!statDataCache) return;
+        const modal = document.getElementById('upgrade-modal');
+        const currentResources = GetRawValue(statDataCache, '陆行舰.舰内资源', {});
+
+        // Populate resources
+        const resourceList = document.getElementById('upgrade-resource-list');
+        resourceList.innerHTML = '';
+        for (const resourceName in currentResources) {
+            if (!currentResources.hasOwnProperty(resourceName) || resourceName === '$meta') continue;
+            const value = SafeGetValue(currentResources, resourceName, '0');
+            resourceList.innerHTML += `<div>${resourceName}: <span style="color: var(--text-primary);">${value}</span></div>`;
+        }
+
+        // Populate facilities
+        const facilityList = document.getElementById('upgrade-facility-list');
+        const facilities = GetRawValue(statDataCache, '陆行舰.舰内设施', {});
+        const shipLevelName = SafeGetValue(statDataCache, '陆行舰.陆行舰等级', '拓荒者级');
+        const maxLevel = SafeGetValue(statDataCache, `陆行舰.陆行舰等级数据.${shipLevelName}.设施等级上限`, 3);
+        facilityList.innerHTML = '';
+
+        for (const facilityName in facilities) {
+            if (!facilities.hasOwnProperty(facilityName) || facilityName === '$meta') continue;
+
+            const level = parseInt(SafeGetValue(facilities[facilityName], '等级', '1'), 10);
+            const nextLevel = level + 1;
+
+            const row = document.createElement('div');
+            row.className = 'upgrade-facility-row';
+
+            let levelText;
+            if (level >= maxLevel) {
+                levelText = `<span style="color: var(--accent-bond);">Lv.${level} (MAX)</span>`;
+            } else {
+                row.classList.add('clickable');
+                row.onclick = () => showUpgradeConfirmation(facilityName, level);
+                levelText = `Lv.${level} &rarr; Lv.${nextLevel}`;
+            }
+
+            row.innerHTML = `
+                <div class="facility-info">
+                    <div class="facility-info-name">${facilityName}</div>
+                </div>
+                <div class="facility-info-level">${levelText}</div>
+            `;
+            facilityList.appendChild(row);
+        }
+
+        document.getElementById('upgrade-confirmation-dialog').style.display = 'none';
+        modal.style.display = 'block';
+      }
+
+      function showUpgradeConfirmation(facilityName, currentLevel) {
+        const dialog = document.getElementById('upgrade-confirmation-dialog');
+        const text = document.getElementById('upgrade-confirmation-text');
+        const costList = document.getElementById('upgrade-cost-list');
+        const warning = document.getElementById('upgrade-resource-warning');
+        const confirmBtn = document.getElementById('upgrade-confirm-execute-btn');
+
+        const nextLevel = currentLevel + 1;
+        text.innerText = `确定要将 ${facilityName} 升级到 Lv.${nextLevel} 吗?`;
+
+        const costs = upgradeCosts[facilityName]?.[nextLevel];
+        if (!costs) {
+            costList.innerHTML = '<span>无法获取升级成本信息。</span>';
+            confirmBtn.disabled = true;
+            dialog.style.display = 'block';
+            return;
+        }
+
+        const currentResources = GetRawValue(statDataCache, '陆行舰.舰内资源', {});
+        let hasEnoughResources = true;
+        let costHtml = '<strong style="margin-bottom: 5px; display: block;">资源消耗:</strong>';
+        costList.style.display = 'grid';
+        costList.style.gridTemplateColumns = '1fr 1fr';
+        costList.style.gap = '5px 10px';
+
+
+        for (const resource in costs) {
+            const required = costs[resource];
+            const current = parseInt(SafeGetValue(currentResources, resource, '0'), 10);
+            const color = current >= required ? 'var(--text-primary)' : 'var(--accent-danger)';
+            costHtml += `<div class="upgrade-cost" style="color: ${color};">${resource}: ${required} (拥有: ${current})</div>`;
+            if (current < required) {
+                hasEnoughResources = false;
+            }
+        }
+        costList.innerHTML = costHtml;
+
+        if (hasEnoughResources) {
+            warning.innerText = '';
+            confirmBtn.disabled = false;
+        } else {
+            warning.innerText = '资源不足!';
+            confirmBtn.disabled = true;
+        }
+
+        confirmBtn.onclick = () => executeUpgrade(facilityName, nextLevel, costs);
+
+        // Hide the main facility list and show the confirmation dialog
+        document.getElementById('upgrade-facility-list').style.display = 'none';
+        dialog.style.display = 'block';
+      }
+
+      function hideUpgradeConfirmation() {
+        document.getElementById('upgrade-facility-list').style.display = 'block';
+        document.getElementById('upgrade-confirmation-dialog').style.display = 'none';
+      }
+
+      function executeUpgrade(facilityName, newLevel, costs) {
+        const costParts = [];
+        for (const resource in costs) {
+            if (costs.hasOwnProperty(resource)) {
+                costParts.push(`${costs[resource]}数量的${resource}`);
+            }
+        }
+
+        const costString = costParts.join('，');
+        const narrative = `使用了${costString}，将${facilityName}升级到Lv${newLevel}`;
+        const commandToSend = `/send ${narrative}|/trigger`;
+
+        if (typeof triggerSlash === 'function') {
+            triggerSlash(commandToSend);
+            // Close modal and refresh display
+            closeUpgradeModal();
+            setTimeout(initDisplay, 500); // Give a moment for data to update
+        } else {
+            console.error('triggerSlash function is not available.');
+            alert('无法执行升级操作。');
+        }
+      }
+
+      function openAiQueryModal() {
+        const modal = document.getElementById('ai-query-modal');
+        const queryList = document.getElementById('ai-query-list');
+        if (!modal) return;
+
+        const questions = [
+            "什么是MSP供应协议",
+            "怎么获取人形",
+            "什么是“遗产”人形",
+            "SRB是什么",
+            "什么是ACU",
+            "什么是UWS",
+            "陆行舰的介绍",
+            "如何升级陆行舰",
+            "‘摇篮’介绍",
+            "地下方舟介绍",
+            "如何更换舰载AI"
+        ];
+
+        queryList.innerHTML = ''; // Clear previous list
+        questions.forEach(q => {
+            const item = document.createElement('div');
+            item.className = 'query-item';
+            item.textContent = q;
+            item.onclick = () => {
+                const commandToSend = `/send 问问舰载AI，“${q}”|/trigger`;
+                if (typeof triggerSlash === 'function') {
+                    triggerSlash(commandToSend);
+                    closeAiQueryModal();
+                } else {
+                    console.error('triggerSlash function is not available.');
+                    alert('无法执行操作。');
+                }
+            };
+            queryList.appendChild(item);
+        });
+
+        modal.style.display = 'block';
+      }
+
+      function closeAiQueryModal() {
+          const modal = document.getElementById('ai-query-modal');
+          if (modal) {
+              modal.style.display = 'none';
+          }
+      }
+
+      function closeUpgradeModal() {
+        const modal = document.getElementById('upgrade-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        // Also reset the view inside
+        const facilityList = document.getElementById('upgrade-facility-list');
+        if (facilityList) {
+            facilityList.style.display = 'block';
+        }
+        const confirmationDialog = document.getElementById('upgrade-confirmation-dialog');
+        if (confirmationDialog) {
+            confirmationDialog.style.display = 'none';
+        }
+      }
+
+      function toggleFacilityDescription(element, facilityName) {
+        const descriptionDiv = element.querySelector('.facility-description');
+        if (!descriptionDiv || !statDataCache) return;
+
+        // If description is empty, populate it
+        if (descriptionDiv.innerHTML === '') {
+          const description = SafeGetValue(statDataCache, `陆行舰.舰内设施.${facilityName}.描述`, '没有找到相关描述。');
+          descriptionDiv.innerText = description;
+        }
+
+        // Toggle display
+        const isVisible = descriptionDiv.style.display === 'block';
+        descriptionDiv.style.display = isVisible ? 'none' : 'block';
+      }
+
+      function toggleDollDetails(headerElement) {
+        const content = headerElement.nextElementSibling;
+        if (content) {
+          const isVisible = content.style.display === 'block';
+          content.style.display = isVisible ? 'none' : 'block';
+        }
+      }
+
+      function toggleItemDescription(element, itemPath) {
+        const descriptionDiv = element.querySelector('.item-description');
+        if (!descriptionDiv || !statDataCache) return;
+
+        // If description is empty, populate it
+        if (descriptionDiv.innerHTML === '') {
+          const description = SafeGetValue(statDataCache, `${itemPath}.描述`, '没有找到相关描述。');
+          descriptionDiv.innerText = description;
+        }
+
+        // Toggle display
+        const isVisible = descriptionDiv.style.display === 'block';
+        descriptionDiv.style.display = isVisible ? 'none' : 'block';
+      }
+
+      function createDollSection(dollData, dollName) {
+        const rarityColor = {
+          C: '#a07d2c',
+          B: '#8fbc8f',
+          A: '#6699cc',
+          S: '#b294bb',
+          SS: '#f0ad4e',
+          SSS: '#d9534f',
+        };
+        const gradeColor = {
+          D: '#a07d2c',
+          C: '#8fbc8f',
+          B: '#6699cc',
+          A: '#b294bb',
+          S: '#f0ad4e',
+        };
+
+        const rarity = SafeGetValue(dollData, '稀有度', 'C');
+        const dollCombat = SafeGetValue(dollData, '人形战力', 'N/A');
+        const weaponName = SafeGetValue(dollData, '人形武装.武装名', 'N/A');
+        const weaponLevel = SafeGetValue(dollData, '人形武装.武装等级', '1');
+
+        const exec = SafeGetValue(dollData, '人形能力.战术执行力', 'D');
+        const tough = SafeGetValue(dollData, '人形能力.素体韧性', 'D');
+        const stable = SafeGetValue(dollData, '人形能力.心智稳定度', 'D');
+        const adapt = SafeGetValue(dollData, '人形能力.环境适应性', 'D');
+        const potential = SafeGetValue(dollData, '人形能力.成长潜质', 'D');
+
+        return `
+            <div class="doll-header" onclick="toggleDollDetails(this)">圣柩人形: ${dollName} <span style="color:${
+          rarityColor[rarity] || 'white'
+        }">[${rarity}]</span></div>
+            <div class="doll-content">
+                <div class="property">
+                    <div class="property-name">精神负荷</div>
+                    <div class="property-value-container">
+                        <span class="value-main" id="doll-${dollName}-strain">0</span>
+                        <span class="value-description" id="doll-${dollName}-strain-desc"></span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div id="doll-${dollName}-strain-bar" class="progress-bar-value"></div>
+                    </div>
+                </div>
+                <div class="property">
+                    <div class="property-name">羁绊深度</div>
+                    <div class="property-value-container">
+                        <span class="value-main" id="doll-${dollName}-bond">0</span>
+                        <span class="value-description" id="doll-${dollName}-bond-desc"></span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div id="doll-${dollName}-bond-bar" class="progress-bar-value" style="background-color: var(--accent-bond);"></div>
+                    </div>
+                </div>
+                <div class="property">
+                    <div class="property-name">武装 / 战力</div>
+                    <div class="property-value-container">
+                        <span class="value-main" id="doll-${dollName}-combat">${weaponName} Lv.${weaponLevel} / ${dollCombat}</span>
+                    </div>
+                </div>
+                <div class="property">
+                    <div class="property-name">能力评估</div>
+                    <div class="property-value-container" style="gap: 5px;">
+                        <span class="value-description" style="color:${gradeColor[exec]}">执:${exec}</span>
+                        <span class="value-description" style="color:${gradeColor[tough]}">韧:${tough}</span>
+                        <span class="value-description" style="color:${gradeColor[stable]}">稳:${stable}</span>
+                        <span class="value-description" style="color:${gradeColor[adapt]}">适:${adapt}</span>
+                        <span class="value-description" style="color:${gradeColor[potential]}">潜:${potential}</span>
+                    </div>
+                </div>
+                <div class="property" style="grid-template-columns: 1fr; grid-template-areas: 'name' 'value'; gap: 8px;">
+                    <div class="property-name" style="grid-area: name;">外貌</div>
+                    <div class="property-value-container" style="grid-area: value; justify-content: flex-end; text-align: right;">
+                        <span class="value-description text-wrap" style="color: var(--text-primary);">${SafeGetValue(dollData, '外貌', 'N/A')}</span>
+                    </div>
+                </div>
+                <div class="property" style="grid-template-columns: 1fr; grid-template-areas: 'name' 'value'; gap: 8px;">
+                    <div class="property-name" style="grid-area: name;">着装</div>
+                    <div class="property-value-container" style="grid-area: value; justify-content: flex-end; text-align: right;">
+                        <span class="value-description text-wrap" style="color: var(--text-primary);">${SafeGetValue(dollData, '着装', 'N/A')}</span>
+                    </div>
+                </div>
+                <div class="property" style="grid-template-columns: 1fr; grid-template-areas: 'name' 'value'; gap: 8px;">
+                    <div class="property-name" style="grid-area: name;">性格</div>
+                    <div class="property-value-container" style="grid-area: value; justify-content: flex-end; text-align: right;">
+                        <span class="value-description text-wrap" style="color: var(--text-primary);">${SafeGetValue(dollData, '性格', 'N/A')}</span>
+                    </div>
+                </div>
+                <div class="property" style="grid-template-columns: 1fr; grid-template-areas: 'name' 'value'; gap: 8px;">
+                    <div class="property-name" style="grid-area: name;">作战风格</div>
+                    <div class="property-value-container" style="grid-area: value; justify-content: flex-end; text-align: right;">
+                        <span class="value-description text-wrap" style="color: var(--text-primary);">${SafeGetValue(dollData, '作战风格', 'N/A')}</span>
+                    </div>
+                </div>
+                <div class="property" style="grid-template-columns: 1fr; grid-template-areas: 'name' 'value'; gap: 8px;">
+                    <div class="property-name" style="grid-area: name;">专长</div>
+                    <div class="property-value-container" style="grid-area: value; justify-content: flex-end; text-align: right;">
+                        <span class="value-description text-wrap" style="color: var(--text-primary);">${SafeGetValue(dollData, '专长', 'N/A')}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+      }
+
+      function createExpandableItemSection(title, sectionData, itemPathPrefix, statusGrid, insertBeforeElement = null) {
+        // Do not render if data is missing or empty (ignoring meta)
+        if (!sectionData || typeof sectionData !== 'object' || Object.keys(sectionData).filter(k => k !== '$meta' && SafeGetValue(sectionData[k], '名称', '') !== '').length === 0) {
+            return;
+        }
+
+        const sectionEl = document.createElement('div');
+        sectionEl.className = 'section dynamic-ship-section';
+        sectionEl.innerHTML = `
+            <div class="section-header clickable" onclick="toggleSection(this)">${title}</div>
+            <div class="section-content" style="display: none; gap: 10px;"></div>
+        `;
+        const contentEl = sectionEl.querySelector('.section-content');
+
+        for (const itemKey in sectionData) {
+            if (!sectionData.hasOwnProperty(itemKey) || itemKey === '$meta') continue;
+
+            const item = sectionData[itemKey];
+            const itemName = SafeGetValue(item, '名称', '');
+            // Skip empty/placeholder items
+            if (itemName === '') continue;
+
+            const itemStatus = SafeGetValue(item, '状态', '未知');
+
+            const itemEl = document.createElement('div');
+            itemEl.className = 'property';
+            itemEl.style.cursor = 'pointer';
+            const itemPath = `${itemPathPrefix}.${itemKey}`;
+            itemEl.setAttribute('onclick', `toggleItemDescription(this, '${itemPath}')`);
+            itemEl.innerHTML = `
+                <div class="property-name" style="text-transform: none;">${itemName}</div>
+                <div class="property-value-container">
+                    <span class="value-main" style="font-size: 1em; color: ${itemStatus === '良好' ? 'var(--accent-bond)' : 'var(--accent-warning)'};">${itemStatus}</span>
+                </div>
+                <div class="item-description"></div>
+            `;
+            contentEl.appendChild(itemEl);
+        }
+
+        // Only append the section if it has actual items to show
+        if (contentEl.children.length > 0) {
+            if (insertBeforeElement) {
+                statusGrid.insertBefore(sectionEl, insertBeforeElement);
+            } else {
+                statusGrid.appendChild(sectionEl);
+            }
+        }
+      }
+
+      function renderDollList(dollList) {
+        const dollContentWrapper = document.getElementById('doll-list-content');
+        dollContentWrapper.innerHTML = ''; // Clear previous content
+
+        // Create and append sort controls
+        const sortControls = document.createElement('div');
+        sortControls.className = 'sort-controls';
+        sortControls.innerHTML = `
+            <button class="sort-btn" onclick="sortDolls('rarity', event)">稀有度</button>
+            <button class="sort-btn" onclick="sortDolls('combat', event)">战力</button>
+            <button class="sort-btn" onclick="sortDolls('bond', event)">羁绊</button>
+        `;
+        dollContentWrapper.appendChild(sortControls);
+
+        // Set active class on the correct button
+        const activeSortBtn = sortControls.querySelector(`button[onclick^="sortDolls('${currentSort.key}'"]`);
+        if(activeSortBtn) {
+            activeSortBtn.classList.add('active');
+        }
+
+        if (Array.isArray(dollList)) {
+            dollList.forEach(dollData => {
+              if (typeof dollData !== 'object' || dollData === null) return; // Skip meta strings etc.
+              const dollName = SafeGetValue(dollData, '代号', null);
+              if (!dollName) return;
+
+              const dollElement = document.createElement('div');
+              dollElement.innerHTML = createDollSection(dollData, dollName);
+              // Append each part of the doll section (header and content)
+              while(dollElement.firstChild) {
+                dollContentWrapper.appendChild(dollElement.firstChild);
+              }
+
+              // Now update the progress bars for this specific doll
+              const dollStrainStages = [
+                { min: 0, max: 19, name: '状态良好' },
+                { min: 20, max: 39, name: '轻度疲劳' },
+                { min: 40, max: 69, name: '中度承压' },
+                { min: 70, max: 89, name: '重度过载' },
+                { min: 90, max: 100, name: '崩溃边缘' },
+              ];
+              updateProgressBar(
+                `doll-${dollName}-strain-bar`,
+                `doll-${dollName}-strain`,
+                `doll-${dollName}-strain-desc`,
+                SafeGetValue(dollData, '精神负荷', 0),
+                0,
+                100,
+                dollStrainStages,
+              );
+
+              const dollBondStages = [
+                { min: 0, max: 199, name: '公式化应对' },
+                { min: 200, max: 399, name: '谨慎观察' },
+                { min: 400, max: 699, name: '可靠战友' },
+                { min: 700, max: 899, name: '私下信赖' },
+                { min: 900, max: 1000, name: '灵魂共鸣' },
+              ];
+              updateProgressBar(
+                `doll-${dollName}-bond-bar`,
+                `doll-${dollName}-bond`,
+                `doll-${dollName}-bond-desc`,
+                SafeGetValue(dollData, '羁绊深度', 0),
+                0,
+                10000,
+                dollBondStages,
+              );
+            });
+        }
+      }
+
+      function sortDolls(key, event) {
+        event.stopPropagation(); // Prevent the section from toggling
+
+        if (currentSort.key === key) {
+            currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSort.key = key;
+            currentSort.direction = 'desc'; // Default to descending for new sort key
+        }
+
+        let dollList = GetRawValue(statDataCache, '人形列表.圣柩人形', []);
+        if (!Array.isArray(dollList)) return;
+
+        const rarityOrder = { 'C': 0, 'B': 1, 'A': 2, 'S': 3, 'SS': 4, 'SSS': 5 };
+
+        dollList.sort((a, b) => {
+            let valA, valB;
+            switch (key) {
+                case 'rarity':
+                    valA = rarityOrder[SafeGetValue(a, '稀有度', 'C')] || 0;
+                    valB = rarityOrder[SafeGetValue(b, '稀有度', 'C')] || 0;
+                    break;
+                case 'combat':
+                    valA = parseInt(SafeGetValue(a, '人形战力', '0'), 10);
+                    valB = parseInt(SafeGetValue(b, '人形战力', '0'), 10);
+                    break;
+                case 'bond':
+                    valA = parseInt(SafeGetValue(a, '羁绊深度', '0'), 10);
+                    valB = parseInt(SafeGetValue(b, '羁绊深度', '0'), 10);
+                    break;
+                default:
+                    return 0;
+            }
+
+            if (currentSort.direction === 'asc') {
+                return valA - valB;
+            } else {
+                return valB - valA;
+            }
+        });
+
+        renderDollList(dollList);
+      }
+
+      function renderMissions() {
+        const missionListContainer = document.getElementById('mission-list');
+        missionListContainer.innerHTML = '';
+
+        const filteredMissions = missionCache.filter(mission => {
+            if (currentMissionFilter === 'all') return true;
+            return SafeGetValue(mission, '任务类型', '') === currentMissionFilter;
+        });
+
+        if (filteredMissions.length === 0) {
+            missionListContainer.innerHTML = `
+              <div class="property">
+                  <div class="property-value-container" style="justify-content: flex-start; grid-column: 1 / -1;">
+                      <span class="value-main">无</span>
+                  </div>
+              </div>`;
+            return;
+        }
+
+        filteredMissions.forEach(missionData => {
+            const missionName = SafeGetValue(missionData, '任务名', '');
+            const missionLevel = SafeGetValue(missionData, '任务等级', '');
+            const missionObjective = SafeGetValue(missionData, '任务目标', '');
+            const missionReward = SafeGetValue(missionData, '任务奖励', '');
+            const missionType = SafeGetValue(missionData, '任务类型', '');
+
+            const missionElement = document.createElement('div');
+            missionElement.classList.add('property');
+            missionElement.style.cssText =
+              "grid-template-columns: 1fr; grid-template-areas: 'name' 'value'; gap: 8px; border-top: 1px solid var(--border-color); padding-top: 10px;";
+
+            const typeColor = missionType === '主线' ? 'var(--accent-danger)' : 'var(--accent-bond)';
+
+            missionElement.innerHTML = `
+              <div class="property-name" style="grid-area: name; font-size: var(--font-size-lg); color: var(--text-header);">
+                ${missionName} <span style="color: ${typeColor};">[${missionType}]</span> <span style="color: var(--accent-warning);">[${missionLevel}]</span>
+              </div>
+              <div class="property-value-container" style="grid-area: value; flex-direction: column; align-items: flex-start; text-align: left; gap: 5px;">
+                <span class="value-description text-wrap" style="color: var(--text-primary);">目标: ${missionObjective}</span>
+                <span class="value-description text-wrap" style="color: var(--accent-bond);">奖励: ${missionReward}</span>
+              </div>
+            `;
+            missionListContainer.appendChild(missionElement);
+        });
+      }
+
+      async function initDisplay() {
+        try {
+          const messages = await getChatMessages(getCurrentMessageId());
+          if (!messages || messages.length === 0 || !messages[0].data) {
+            document.getElementById('status-display').innerHTML =
+              "<p style='color:red;padding:10px;'>无法加载状态数据 (messages empty)</p>";
+            return;
+          }
+          const gameData = messages[0].data;
+          const characterData = gameData.display_data || gameData.stat_data;
+          if (!characterData) {
+            document.getElementById('status-display').innerHTML =
+              "<p style='color:red;padding:10px;'>无法加载状态数据 (characterData missing)</p>";
+            return;
+          }
+
+          // --- Global Info ---
+          const statData = gameData.stat_data;
+          statDataCache = statData; // Cache the data
+
+          // 清理旧的动态舰船分区，防止升级后刷新时重复创建
+          document.querySelectorAll('.dynamic-ship-section').forEach(el => el.remove());
+
+          // --- Themeing ---
+          const shipType = SafeGetValue(statData, '陆行舰.陆行舰等级', '拓荒者级');
+          const body = document.body;
+          body.classList.remove('theme-pioneer', 'theme-expedition', 'theme-dominator'); // Clear old themes
+          if (shipType === '远征军级') {
+            body.classList.add('theme-expedition');
+          } else if (shipType === '主宰级') {
+            body.classList.add('theme-dominator');
+          } else {
+            body.classList.add('theme-pioneer');
+          }
+
+          document.getElementById('global-time').innerText = SafeGetValue(statData, '时间', 'N/A');
+          document.getElementById('global-location').innerText = SafeGetValue(statData, '地点', 'N/A');
+          document.getElementById('global-weather').innerText = SafeGetValue(statData, '天气', 'N/A');
+          document.getElementById('global-pollution').innerText = SafeGetValue(statData, '纳米尘污染等级', 'N/A');
+          const merit = SafeGetValue(statData, '功绩点', '0');
+          const rank = SafeGetValue(statData, '功绩排名', '未排名');
+          document.getElementById('global-merit').innerText = `${merit} / ${rank}`;
+          document.getElementById('global-commander-rank').innerText = SafeGetValue(statData, '指挥官评级', '新晋指挥官');
+          document.getElementById('srb-announcement').innerText = SafeGetValue(statData, 'SRB公告', '无');
+
+          // --- Missions ---
+          missionCache = []; // Reset cache
+          let missionsObject = GetRawValue(statData, 'SRB委派任务', null);
+          if (missionsObject && Array.isArray(missionsObject)) {
+            missionsObject = missionsObject[0];
+          }
+
+          if (missionsObject && typeof missionsObject === 'object') {
+            for (const key in missionsObject) {
+              if (!missionsObject.hasOwnProperty(key) || key === '$meta') continue;
+
+              let singleTaskData = missionsObject[key];
+              if (singleTaskData && Array.isArray(singleTaskData)) {
+                singleTaskData = singleTaskData[0];
+              }
+
+              if (singleTaskData && typeof singleTaskData === 'object' && SafeGetValue(singleTaskData, '任务名', '').trim() !== '') {
+                missionCache.push(singleTaskData);
+              }
+            }
+          }
+
+          // Dynamically create filter buttons
+          const filterControls = document.getElementById('mission-filter-controls');
+          const missionTypes = ['all', ...new Set(missionCache.map(m => SafeGetValue(m, '任务类型', '')).filter(t => t))];
+
+          if (!missionTypes.includes(currentMissionFilter)) {
+              currentMissionFilter = 'all';
+          }
+
+          filterControls.innerHTML = ''; // Clear existing buttons
+          missionTypes.forEach(type => {
+              const btn = document.createElement('button');
+              btn.className = 'sort-btn';
+              const typeText = { 'all': '全部' };
+              btn.textContent = typeText[type] || type;
+              if (type === currentMissionFilter) {
+                  btn.classList.add('active');
+              }
+              btn.onclick = (event) => {
+                  event.stopPropagation();
+                  currentMissionFilter = type;
+                  filterControls.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+                  btn.classList.add('active');
+                  renderMissions();
+              };
+              filterControls.appendChild(btn);
+          });
+
+          renderMissions();
+
+          // --- Ship Log ---
+          const shipLogContainer = document.getElementById('ship-log-content');
+          const shipLogData = GetRawValue(statData, '陆行舰.舰上信息', {});
+          shipLogContainer.innerHTML = ''; // Clear content
+
+          if (shipLogData && typeof shipLogData === 'object' && !Array.isArray(shipLogData)) {
+            const logTitles = {
+              '人形日常': '人形日常',
+              '最近战报': '最近战报',
+              'AI建议': 'AI建议',
+              '指挥官动向': '指挥官动向'
+            };
+
+            let isFirst = true;
+            for (const key in logTitles) {
+              if (logTitles.hasOwnProperty(key)) {
+                const value = SafeGetValue(shipLogData, key, '无');
+                const logEntry = document.createElement('div');
+                // Add a border to all but the first entry
+                const headerStyle = isFirst ? 'margin-top: 0; padding-top: 0; border-top: none;' : 'border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 10px;';
+
+                logEntry.innerHTML = `
+                    <div class="doll-header" onclick="toggleDollDetails(this)" style="${headerStyle}">${logTitles[key]}</div>
+                    <div class="doll-content" style="padding: 10px 5px; display: none;">
+                        <span class="value-description text-wrap" style="color: var(--text-primary);">${value || '无'}</span>
+                    </div>
+                `;
+                shipLogContainer.appendChild(logEntry);
+                isFirst = false;
+              }
+            }
+          } else {
+             // Fallback for old string format or unexpected array
+             const oldValue = Array.isArray(shipLogData) ? SafeGetValue(shipLogData, '0', '一切正常。') : shipLogData;
+             shipLogContainer.innerHTML = `
+                <div class="property" style="grid-template-columns: 1fr; grid-template-areas: 'value'">
+                  <div class="property-value-container" style="justify-content: flex-start; grid-area: value; text-align: left">
+                    <span class="value-description text-wrap" style="color: var(--text-primary)">${oldValue || '一切正常。'}</span>
+                  </div>
+                </div>
+             `;
+          }
+
+          // --- Ship Info ---
+          const shipName = SafeGetValue(statData, '陆行舰.陆行舰等级', '拓荒者级');
+          document.getElementById('ship-name').innerText = `陆行舰 “${shipName}”`;
+          document.getElementById('ship-type').innerText = shipName;
+          const shipAI = GetRawValue(statData, '陆行舰.舰载AI', {});
+          const aiName = SafeGetValue(shipAI, '名称', '无');
+          const aiStyle = SafeGetValue(shipAI, '风格', '未知风格').split('：')[0]; // 只取“：”之前的部分
+          document.getElementById('ship-ai').innerText = `${aiName} / ${aiStyle}`;
+          document.getElementById('ship-core').innerText = SafeGetValue(statData, '陆行舰.能源核心', 'N/A');
+
+          // --- Ship Limits ---
+          const shipLevelDataPath = `陆行舰.陆行舰等级数据.${shipName}`;
+          const facilityCap = SafeGetValue(statData, `${shipLevelDataPath}.设施最大数量`, 'N/A');
+          const levelCap = SafeGetValue(statData, `${shipLevelDataPath}.设施等级上限`, 'N/A');
+          document.getElementById('ship-level-cap').innerText = `Lv.${levelCap}`;
+
+          // --- Ship Facilities (Dynamic) ---
+          const facilitiesContainer = document.getElementById('ship-facilities-list');
+          const facilitiesData = GetRawValue(statData, '陆行舰.舰内设施', {});
+          facilitiesContainer.innerHTML = ''; // Clear previous list
+
+          const maxFacilities = parseInt(facilityCap, 10);
+          let facilityCount = 0;
+
+          for (const facilityName in facilitiesData) {
+            if (!facilitiesData.hasOwnProperty(facilityName) || facilityName === '$meta') {
+              continue;
+            }
+            // Stop adding facilities if the cap is reached
+            if (!isNaN(maxFacilities) && facilityCount >= maxFacilities) {
+              break;
+            }
+            const facility = facilitiesData[facilityName];
+            const level = SafeGetValue(facility, '等级', '1');
+
+            const facilityElement = document.createElement('div');
+            facilityElement.className = 'facility-container';
+            facilityElement.setAttribute('onclick', `toggleFacilityDescription(this, '${facilityName}')`);
+            facilityElement.innerHTML = `
+              <div class="facility-header">
+                <span class="property-name">${facilityName}</span>
+                <span class="value-main">Lv.${level} / ${levelCap}</span>
+              </div>
+              <div class="facility-description"></div>
+            `;
+            facilitiesContainer.appendChild(facilityElement);
+            facilityCount++;
+          }
+
+          document.getElementById('ship-facility-cap').innerText = `${facilityCount} / ${facilityCap}`;
+
+          const statusGrid = document.querySelector('.status-grid');
+          // Correctly identify the ship section element to insert before
+          const shipSection = document.getElementById('ship-name-container').parentElement;
+
+          // --- Landship Armaments & Hangar ---
+          const armamentsData = GetRawValue(statData, '陆行舰.陆行舰载武装', {});
+          const hangarData = GetRawValue(statData, '陆行舰.陆行舰机库', {});
+          const shipLevelData = GetRawValue(statData, `陆行舰.陆行舰等级数据.${shipName}`, {});
+          const armamentCap = GetRawValue(shipLevelData, '武器上限', 'N/A');
+          const hangarCap = GetRawValue(shipLevelData, '载具上限', 'N/A');
+          const armamentsCount = Object.keys(armamentsData).filter(k=>k!=='$meta' && SafeGetValue(armamentsData[k], '名称', '') !== '').length;
+          const hangarCount = Object.keys(hangarData).filter(k=>k!=='$meta' && SafeGetValue(hangarData[k], '名称', '') !== '').length;
+
+          // Create sections in reverse order of appearance, as insertBefore adds the new element at the beginning.
+          // 1. Create Hangar section first.
+          createExpandableItemSection(
+              `陆行舰机库 (${hangarCount} / ${hangarCap})`,
+              hangarData,
+              '陆行舰.陆行舰机库',
+              statusGrid,
+              shipSection
+          );
+
+          // 2. Create Armaments section second, so it appears before the Hangar.
+          createExpandableItemSection(
+              `陆行舰载武装 (${armamentsCount} / ${armamentCap})`,
+              armamentsData,
+              '陆行舰.陆行舰载武装',
+              statusGrid,
+              shipSection
+          );
+
+          // --- Dynamic Ship Sections ---
+          const shipData = GetRawValue(statData, '陆行舰', {});
+          const handledShipKeys = [
+            '陆行舰等级',
+            '能源核心',
+            '舰载AI',
+            '舰内设施',
+            '$meta',
+            '陆行舰等级数据',
+            '舰上信息',
+            '人形武备库', // Will be handled inside '舰内资源'
+            '特殊物品库', // Will be handled inside '舰内资源'
+            '陆行舰载武装', // Handled separately
+            '陆行舰机库', // Handled separately
+          ];
+
+          for (const shipSectionName in shipData) {
+            if (!shipData.hasOwnProperty(shipSectionName) || handledShipKeys.includes(shipSectionName)) {
+              continue;
+            }
+
+            const sectionData = shipData[shipSectionName];
+            if (typeof sectionData !== 'object' || sectionData === null) continue;
+
+            // Create the section container
+            const sectionEl = document.createElement('div');
+            sectionEl.className = 'section dynamic-ship-section'; // 添加用于清理的类
+            if (shipSectionName === '舰内资源') {
+              sectionEl.classList.add('ship-resources-section');
+            }
+            sectionEl.innerHTML = `
+              <div class="section-header clickable" onclick="toggleSection(this)">${shipSectionName}</div>
+              <div class="section-content" style="display: none;"></div>
+            `;
+            const contentEl = sectionEl.querySelector('.section-content');
+
+            // --- Armory Sub-Section (if this is the resources section) ---
+            if (shipSectionName === '舰内资源') {
+              const armoryData = GetRawValue(statData, '陆行舰.人形武备库', {});
+              if (armoryData && typeof armoryData === 'object' && Object.keys(armoryData).filter(k => k !== '$meta').length > 0) {
+                const armoryContainer = document.createElement('div');
+                armoryContainer.style.marginTop = '15px';
+                armoryContainer.innerHTML = `
+                  <div class="section-header clickable" onclick="toggleSection(this)" style="font-size: 1.1em; border-top: 1px solid var(--border-color); padding-top: 10px;">人形武备库</div>
+                  <div class="section-content" style="display: none; gap: 10px; padding-left: 10px;"></div>
+                `;
+                const armoryContentEl = armoryContainer.querySelector('.section-content');
+
+                for (const weaponKey in armoryData) {
+                  if (!armoryData.hasOwnProperty(weaponKey) || weaponKey === '$meta') continue;
+
+                  const weapon = armoryData[weaponKey];
+                  const weaponName = SafeGetValue(weapon, '名称', '未知武器');
+                  const weaponType = SafeGetValue(weapon, '类型', 'N/A');
+                  const weaponLevel = SafeGetValue(weapon, '等级', 'N/A');
+                  const weaponQty = SafeGetValue(weapon, '数量', 'N/A');
+
+                  const weaponEl = document.createElement('div');
+                  weaponEl.className = 'property';
+                  weaponEl.style.cursor = 'pointer';
+                  const weaponPath = `陆行舰.人形武备库.${weaponKey}`;
+                  weaponEl.setAttribute('onclick', `toggleItemDescription(this, '${weaponPath}')`);
+                  weaponEl.innerHTML = `
+                    <div class="property-name" style="text-transform: none;">${weaponName} <span style="color: var(--accent-highlight); font-size: 0.9em;">(Lv.${weaponLevel})</span></div>
+                    <div class="property-value-container">
+                      <span class="value-main">x${weaponQty}</span>
+                    </div>
+                    <div class="item-description"></div>
+                  `;
+                  armoryContentEl.appendChild(weaponEl);
+                }
+                contentEl.appendChild(armoryContainer);
+              }
+
+              // --- Special Items Sub-Section (if this is the resources section) ---
+              const specialItemsData = GetRawValue(statData, '陆行舰.特殊物品库', {});
+              if (specialItemsData && typeof specialItemsData === 'object' && Object.keys(specialItemsData).filter(k => k !== '$meta').length > 0) {
+                const specialItemsContainer = document.createElement('div');
+                specialItemsContainer.style.marginTop = '15px';
+                specialItemsContainer.innerHTML = `
+                  <div class="section-header clickable" onclick="toggleSection(this)" style="font-size: 1.1em; border-top: 1px solid var(--border-color); padding-top: 10px;">特殊物品库</div>
+                  <div class="section-content" style="display: none; gap: 10px; padding-left: 10px;"></div>
+                `;
+                const specialItemsContentEl = specialItemsContainer.querySelector('.section-content');
+
+                for (const itemKey in specialItemsData) {
+                  if (!specialItemsData.hasOwnProperty(itemKey) || itemKey === '$meta' || SafeGetValue(specialItemsData[itemKey], '名称', '') === '') continue;
+
+                  const item = specialItemsData[itemKey];
+                  const itemName = SafeGetValue(item, '名称', '未知物品');
+                  const itemType = SafeGetValue(item, '类型', 'N/A');
+                  const itemQty = SafeGetValue(item, '数量', 'N/A');
+
+                  const itemEl = document.createElement('div');
+                  itemEl.className = 'property';
+                  itemEl.style.cursor = 'pointer';
+                  const itemPath = `陆行舰.特殊物品库.${itemKey}`;
+                  itemEl.setAttribute('onclick', `toggleItemDescription(this, '${itemPath}')`);
+                  itemEl.innerHTML = `
+                    <div class="property-name" style="text-transform: none;">${itemName} <span style="color: var(--accent-highlight); font-size: 0.9em;">(${itemType})</span></div>
+                    <div class="property-value-container">
+                      <span class="value-main">x${itemQty}</span>
+                    </div>
+                    <div class="item-description"></div>
+                  `;
+                  specialItemsContentEl.appendChild(itemEl);
+                }
+                // Only append if there's actual content
+                if (specialItemsContentEl.children.length > 0) {
+                    contentEl.appendChild(specialItemsContainer);
+                }
+              }
+            }
+
+            // Populate the section content
+            for (const propName in sectionData) {
+              if (!sectionData.hasOwnProperty(propName) || propName === '$meta') continue;
+
+              let propValue = GetRawValue(sectionData, propName);
+
+              // Check if the value is wrapped in a [value, description] array and extract the actual value
+              if (Array.isArray(propValue) && propValue.length === 2 && typeof propValue[1] === 'string') {
+                propValue = propValue[0];
+              }
+
+              // Case 1: Value is an array (likely an item list)
+              if (Array.isArray(propValue)) {
+                // Create a sub-header for the item list category
+                const subHeader = document.createElement('div');
+                subHeader.className = 'property-name';
+                subHeader.style.marginBottom = '5px';
+                subHeader.innerText = propName;
+                contentEl.appendChild(subHeader);
+
+                // List the items
+                propValue.forEach(item => {
+                  if (typeof item !== 'object' || item === null) return;
+                  const itemName = SafeGetValue(item, '物品名', '未知物品');
+                  const itemQty = SafeGetValue(item, '数量', 'N/A');
+                  const itemEl = document.createElement('div');
+                  itemEl.className = 'property';
+                  itemEl.style.paddingLeft = '15px'; // Indent items
+                  itemEl.innerHTML = `
+                    <div class="property-name" style="text-transform: none;">${itemName}</div>
+                    <div class="property-value-container">
+                      <span class="value-main">${itemQty}</span>
+                    </div>
+                  `;
+                  contentEl.appendChild(itemEl);
+                });
+              }
+              // Case 2: Simple key-value pair
+              else {
+                const propEl = document.createElement('div');
+                propEl.className = 'property';
+                propEl.innerHTML = `
+                  <div class="property-name">${propName}</div>
+                  <div class="property-value-container">
+                    <span class="value-main">${propValue}</span>
+                  </div>
+                `;
+                contentEl.appendChild(propEl);
+              }
+            }
+            statusGrid.appendChild(sectionEl);
+          }
+
+          // --- Doll Info ---
+          const dollList = GetRawValue(statData, '人形列表.圣柩人形', []);
+          renderDollList(dollList);
+
+
+        } catch (error) {
+          document.getElementById(
+            'status-display',
+          ).innerHTML = `<p style='color:red;padding:10px;'>状态栏加载出错: ${error.message}</p>`;
+          console.error(error);
+        }
+      }
+
+      function toggleSection(headerElement) {
+        // Stop propagation if a sort button was clicked
+        if (event.target.classList.contains('sort-btn')) {
+            event.stopPropagation();
+            return;
+        }
+        const content = headerElement.nextElementSibling;
+        if (content) {
+          const isVisible = content.style.display === 'flex' || content.style.display === 'block';
+          content.style.display = isVisible ? 'none' : 'flex';
+        }
+      }
+
+      // --- Confirmation Modal Logic ---
+      function showConfirmationModal(title, text, onConfirmCallback) {
+        const modal = document.getElementById('confirmation-modal');
+        if (!modal) return;
+
+        document.getElementById('confirmation-modal-title').innerText = title;
+        document.getElementById('confirmation-modal-text').innerText = text;
+
+        const confirmBtn = document.getElementById('confirmation-modal-confirm-btn');
+
+        // Clone and replace the button to remove old event listeners
+        const newConfirmBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+        newConfirmBtn.onclick = () => {
+          onConfirmCallback();
+          closeConfirmationModal();
+        };
+
+        modal.style.display = 'block';
+      }
+
+      function closeConfirmationModal() {
+        const modal = document.getElementById('confirmation-modal');
+        if (modal) {
+          modal.style.display = 'none';
+        }
+      }
+
+      function openInteractionModal() {
+        const modal = document.getElementById('interaction-modal');
+        if (!modal || !statDataCache) return;
+
+        const dollListContainer = document.getElementById('interaction-doll-list');
+        dollListContainer.innerHTML = ''; // Clear previous list
+
+        const dollList = GetRawValue(statDataCache, '人形列表.圣柩人形', []);
+        let hasDolls = false;
+        if (Array.isArray(dollList) && dollList.length > 0) {
+            dollList.forEach(dollData => {
+                if (typeof dollData !== 'object' || dollData === null) return;
+                const dollName = SafeGetValue(dollData, '代号', null);
+                if (!dollName) return;
+                hasDolls = true;
+
+                const dollItem = document.createElement('div');
+                dollItem.className = 'interaction-doll-item';
+                dollItem.textContent = dollName;
+                dollItem.dataset.dollName = dollName;
+                dollListContainer.appendChild(dollItem);
+            });
+        }
+
+        if (!hasDolls) {
+            dollListContainer.innerHTML = '<p>无可用人形。</p>';
+        }
+
+        modal.style.display = 'block';
+      }
+
+      function closeInteractionModal() {
+        const modal = document.getElementById('interaction-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+      }
+
+      function openArmamentsModal() {
+        const modal = document.getElementById('armaments-modal');
+        if (!modal || !statDataCache) return;
+
+        const listContainer = document.getElementById('armaments-list');
+        listContainer.innerHTML = ''; // Clear previous list
+
+        const items = GetRawValue(statDataCache, '陆行舰.陆行舰载武装', {});
+        let hasItems = false;
+        for (const key in items) {
+            if (!items.hasOwnProperty(key) || key === '$meta') continue;
+
+            const item = items[key];
+            const itemName = SafeGetValue(item, '名称', null);
+            if (!itemName || itemName.trim() === '') continue;
+
+            hasItems = true;
+            const itemButton = document.createElement('button');
+            itemButton.className = 'action-button';
+            itemButton.textContent = itemName;
+            itemButton.dataset.itemName = itemName;
+            listContainer.appendChild(itemButton);
+        }
+
+        if (!hasItems) {
+            listContainer.innerHTML = '<p>无可用武装。</p>';
+        }
+
+        modal.style.display = 'block';
+      }
+
+      function closeArmamentsModal() {
+        const modal = document.getElementById('armaments-modal');
+        if (modal) modal.style.display = 'none';
+      }
+
+      function openHangarModal() {
+        const modal = document.getElementById('hangar-modal');
+        if (!modal || !statDataCache) return;
+
+        const listContainer = document.getElementById('hangar-list');
+        listContainer.innerHTML = ''; // Clear previous list
+
+        const items = GetRawValue(statDataCache, '陆行舰.陆行舰机库', {});
+        let hasItems = false;
+        for (const key in items) {
+            if (!items.hasOwnProperty(key) || key === '$meta') continue;
+
+            const item = items[key];
+            const itemName = SafeGetValue(item, '名称', null);
+            if (!itemName || itemName.trim() === '') continue;
+
+            hasItems = true;
+            const itemButton = document.createElement('button');
+            itemButton.className = 'action-button';
+            itemButton.textContent = itemName;
+            itemButton.dataset.itemName = itemName;
+            listContainer.appendChild(itemButton);
+        }
+
+        if (!hasItems) {
+            listContainer.innerHTML = '<p>无可用载具。</p>';
+        }
+
+        modal.style.display = 'block';
+      }
+
+      function closeHangarModal() {
+        const modal = document.getElementById('hangar-modal');
+        if (modal) modal.style.display = 'none';
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        initDisplay();
+
+        // --- Modal Listeners Setup ---
+
+        // Upgrade Modal
+        const upgradeModal = document.getElementById('upgrade-modal');
+        const openUpgradeBtn = document.getElementById('upgrade-facility-btn');
+        const closeUpgradeBtn = document.getElementById('upgrade-modal-close-btn');
+        if(openUpgradeBtn) openUpgradeBtn.addEventListener('click', openUpgradeModal);
+        if(closeUpgradeBtn) closeUpgradeBtn.addEventListener('click', closeUpgradeModal);
+
+        // AI Query Modal
+        const aiQueryModal = document.getElementById('ai-query-modal');
+        const openAiQueryBtn = document.getElementById('ask-ai-btn');
+        const closeAiQueryBtn = document.getElementById('ai-query-modal-close-btn');
+        if (openAiQueryBtn) openAiQueryBtn.addEventListener('click', openAiQueryModal);
+        if (closeAiQueryBtn) closeAiQueryBtn.addEventListener('click', closeAiQueryModal);
+
+        // Confirmation Modal
+        const confirmationModal = document.getElementById('confirmation-modal');
+        const closeConfirmationBtn = document.getElementById('confirmation-modal-close-btn');
+        const cancelConfirmationBtn = document.getElementById('confirmation-modal-cancel-btn');
+        if(closeConfirmationBtn) closeConfirmationBtn.addEventListener('click', closeConfirmationModal);
+        if(cancelConfirmationBtn) cancelConfirmationBtn.addEventListener('click', closeConfirmationModal);
+
+        // Generic click outside to close modals
+        window.addEventListener('click', (event) => {
+            if (event.target == upgradeModal) closeUpgradeModal();
+            if (event.target == aiQueryModal) closeAiQueryModal();
+            if (event.target == confirmationModal) closeConfirmationModal();
+            if (event.target == document.getElementById('interaction-modal')) closeInteractionModal();
+            if (event.target == document.getElementById('armaments-modal')) closeArmamentsModal();
+            if (event.target == document.getElementById('hangar-modal')) closeHangarModal();
+        });
+
+        // Interaction Modal
+        const openInteractionBtn = document.getElementById('interact-doll-btn');
+        const closeInteractionBtn = document.getElementById('interaction-modal-close-btn');
+        if (openInteractionBtn) openInteractionBtn.addEventListener('click', openInteractionModal);
+        if (closeInteractionBtn) closeInteractionBtn.addEventListener('click', closeInteractionModal);
+
+        // Doll selection in interaction modal
+        const interactionDollList = document.getElementById('interaction-doll-list');
+        if (interactionDollList) {
+            interactionDollList.addEventListener('click', (event) => {
+                if (event.target.matches('.interaction-doll-item')) {
+                    event.target.classList.toggle('selected');
+                }
+            });
+        }
+
+        // Interaction action buttons
+        const interactionActionsContainer = document.getElementById('interaction-actions');
+        if (interactionActionsContainer) {
+            interactionActionsContainer.addEventListener('click', (event) => {
+                if (event.target.matches('.action-button')) {
+                    const selectedDolls = Array.from(document.querySelectorAll('.interaction-doll-item.selected'))
+                                               .map(item => item.dataset.dollName);
+
+                    if (selectedDolls.length === 0) {
+                        alert('请至少选择一个人形。');
+                        return;
+                    }
+
+                    const action = event.target.dataset.action;
+                    const dollNames = selectedDolls.join('、');
+                    const narrative = `对${dollNames}${action}`;
+                    const commandToSend = `/send ${narrative}|/trigger`;
+
+                    if (typeof triggerSlash === 'function') {
+                        triggerSlash(commandToSend);
+                        closeInteractionModal();
+                    } else {
+                        console.error('triggerSlash function is not available.');
+                        alert('无法执行操作。');
+                    }
+                }
+            });
+        }
+
+        // --- Action Button Listeners ---
+
+        const mspButton = document.getElementById('msp-supply-btn');
+        if (mspButton) {
+          mspButton.addEventListener('click', () => {
+            showConfirmationModal(
+              '获取供应协议',
+              '是否使用MSP供应协议获取新的供应?',
+              () => {
+                const commandToSend = '/send 打开MSP供应协议|/trigger';
+                if (typeof triggerSlash === 'function') {
+                  triggerSlash(commandToSend);
+                } else {
+                  console.error('triggerSlash function is not available.');
+                }
+              }
+            );
+          });
+        }
+
+        const requestDollButton = document.getElementById('request-doll-btn');
+        if (requestDollButton) {
+          requestDollButton.addEventListener('click', () => {
+            showConfirmationModal(
+              '人形调用申请',
+              '是否使用人形调用申请获取新的人形?',
+              () => {
+                const commandToSend = '/send 使用申请单获取随机人形|/trigger';
+                if (typeof triggerSlash === 'function') {
+                  triggerSlash(commandToSend);
+                } else {
+                  console.error('triggerSlash function is not available.');
+                }
+              }
+            );
+          });
+        }
+
+        // --- Armaments Modal Listeners ---
+        const openArmamentsBtn = document.getElementById('armaments-btn');
+        const closeArmamentsBtn = document.getElementById('armaments-modal-close-btn');
+        const armamentsList = document.getElementById('armaments-list');
+        const armamentsConfirmBtn = document.getElementById('armaments-confirm-btn');
+
+        if (openArmamentsBtn) openArmamentsBtn.addEventListener('click', openArmamentsModal);
+        if (closeArmamentsBtn) closeArmamentsBtn.addEventListener('click', closeArmamentsModal);
+
+        if (armamentsList) {
+            armamentsList.addEventListener('click', (event) => {
+                if (event.target.matches('.action-button')) {
+                    armamentsList.querySelectorAll('.action-button').forEach(btn => btn.classList.remove('selected'));
+                    event.target.classList.add('selected');
+                }
+            });
+        }
+
+        if (armamentsConfirmBtn) {
+            armamentsConfirmBtn.addEventListener('click', () => {
+                const selectedWeapon = armamentsList.querySelector('.action-button.selected');
+                if (!selectedWeapon) {
+                    alert('请选择一个武装。');
+                    return;
+                }
+                const weaponName = selectedWeapon.dataset.itemName;
+                const narrative = `使用舰载武装【${weaponName}】`;
+                const commandToSend = `/send ${narrative}|/trigger`;
+                if (typeof triggerSlash === 'function') {
+                    triggerSlash(commandToSend);
+                    closeArmamentsModal();
+                } else {
+                    console.error('triggerSlash function is not available.');
+                    alert('无法执行操作。');
+                }
+            });
+        }
+
+        // --- Hangar Modal Listeners ---
+        const openHangarBtn = document.getElementById('hangar-btn');
+        const closeHangarBtn = document.getElementById('hangar-modal-close-btn');
+        const hangarList = document.getElementById('hangar-list');
+        const hangarConfirmBtn = document.getElementById('hangar-confirm-btn');
+
+        if (openHangarBtn) openHangarBtn.addEventListener('click', openHangarModal);
+        if (closeHangarBtn) closeHangarBtn.addEventListener('click', closeHangarModal);
+
+        if (hangarList) {
+            hangarList.addEventListener('click', (event) => {
+                if (event.target.matches('.action-button')) {
+                    hangarList.querySelectorAll('.action-button').forEach(btn => btn.classList.remove('selected'));
+                    event.target.classList.add('selected');
+                }
+            });
+        }
+
+        if (hangarConfirmBtn) {
+            hangarConfirmBtn.addEventListener('click', () => {
+                const selectedVehicle = hangarList.querySelector('.action-button.selected');
+                if (!selectedVehicle) {
+                    alert('请选择一个载具。');
+                    return;
+                }
+                const vehicleName = selectedVehicle.dataset.itemName;
+                const narrative = `出动机库载具【${vehicleName}】`;
+                const commandToSend = `/send ${narrative}|/trigger`;
+                if (typeof triggerSlash === 'function') {
+                    triggerSlash(commandToSend);
+                    closeHangarModal();
+                } else {
+                    console.error('triggerSlash function is not available.');
+                    alert('无法执行操作。');
+                }
+            });
+        }
+      });
+    </script>
+  </body>
+</html>
+```

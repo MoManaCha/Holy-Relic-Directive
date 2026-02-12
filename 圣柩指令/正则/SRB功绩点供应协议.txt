@@ -1,0 +1,490 @@
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSP 供应协议</title>
+    <style>
+        /* CSS is based on the provided examples, with minor tweaks for the new context */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Microsoft YaHei', sans-serif; }
+        :root {
+            --background: #1a1a1a; --container-bg: #222; --card-bg: #2c2c2c; --card-hover-bg: #383838;
+            --text-primary: #e0e0e0; --text-secondary: #a0a0a0; --accent: #5bc0de; --border-color: #444;
+            --scrollbar-bg: #2c2c2c; --scrollbar-thumb: #555; --scrollbar-thumb-hover: #777;
+        }
+        body {
+            background-color: var(--background);
+            color: var(--text-primary);
+            padding: 15px;
+            overflow-x: auto;
+        }
+        .protocol-container { max-width: 1200px; width: 100%; margin: 0; display: flex; flex-direction: column; gap: 15px; }
+        header { width: 100%; padding-bottom: 15px; border-bottom: 2px solid var(--accent); }
+        h1 { font-size: 1.8rem; letter-spacing: 1px; }
+        .header-subtitle { font-size: 0.9rem; margin-top: 4px; color: var(--text-secondary); }
+        .category-bar { display: flex; flex-wrap: wrap; gap: 10px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+        .category-btn {
+            padding: 8px 15px; background-color: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-secondary);
+            font-size: 0.9rem; cursor: pointer; transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+        }
+        .category-btn:hover { background-color: var(--card-hover-bg); color: var(--text-primary); }
+        .category-btn.active { background-color: rgba(91, 192, 222, 0.1); color: var(--accent); border-color: var(--accent); font-weight: bold; }
+        .main-content { display: flex; gap: 20px; width: 100%; max-height: 450px; }
+        .item-list { flex: 0 0 320px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; padding-right: 5px; }
+        .item-card {
+            background-color: var(--card-bg); padding: 12px; border-left: 3px solid var(--border-color); cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease, opacity 0.3s;
+        }
+        .item-card.hidden { display: none; }
+        .item-card:hover { background-color: var(--card-hover-bg); }
+        .item-card.active { background-color: var(--card-hover-bg); border-left-color: var(--accent); }
+        .item-name { font-size: 1rem; font-weight: bold; margin-bottom: 4px; }
+        .item-price { font-size: 0.85rem; color: var(--accent); font-weight: bold; }
+        .item-detail-wrapper { flex: 1; background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 25px; overflow-y: auto; }
+        .detail-placeholder, .detail-error { color: var(--text-secondary); font-size: 1rem; text-align: center; height: 100%; display: flex; align-items: center; justify-content: center; }
+        .detail-content { display: none; flex-direction: column; gap: 15px; width: 100%; }
+        .detail-header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; }
+        .detail-name { font-size: 1.5rem; }
+        .detail-price { font-size: 1.2rem; color: var(--accent); font-weight: bold; }
+        .detail-label { font-size: 0.8rem; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); display: flex; align-items: center; }
+        .detail-label::before { content: '♦'; color: var(--accent); margin-right: 8px; }
+        .detail-value { font-size: 0.95rem; line-height: 1.6; background-color: var(--container-bg); padding: 10px; border-left: 2px solid var(--accent); color: var(--text-primary); }
+        .rank-value { font-style: italic; background-color: rgba(91, 192, 222, 0.1); }
+        .hidden-input-area { display: none; }
+
+        .quantity-selector { display: flex; align-items: center; gap: 10px; }
+        .quantity-btn { background-color: var(--container-bg); border: 1px solid var(--border-color); color: var(--text-primary); width: 30px; height: 30px; font-size: 1.2rem; cursor: pointer; }
+        .quantity-input { width: 50px; text-align: center; background-color: var(--background); border: 1px solid var(--border-color); color: var(--text-primary); height: 30px; }
+        .add-to-cart-btn { background-color: var(--accent); color: var(--background); border: none; padding: 10px 15px; font-size: 1rem; cursor: pointer; transition: background-color 0.2s; }
+        .add-to-cart-btn:hover { background-color: #7cd3eb; }
+
+        .cart-container { margin-top: 20px; background-color: var(--container-bg); padding: 15px; border-top: 2px solid var(--accent); }
+        .cart-title { font-size: 1.3rem; margin-bottom: 10px; }
+        .cart-items { max-height: 200px; overflow-y: auto; padding-right: 5px; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border-color); }
+        .cart-item-name { flex: 1; }
+        .cart-item-quantity { display: flex; align-items: center; gap: 8px; }
+        .cart-item-price { width: 100px; text-align: right; color: var(--accent); }
+        .cart-footer { display: flex; justify-content: flex-end; align-items: center; margin-top: 15px; }
+        .cart-total { text-align: right; font-size: 1.2rem; font-weight: bold; }
+        .cart-total-label { color: var(--text-secondary); }
+        .cart-total-price { color: var(--accent); margin-left: 10px; }
+        .checkout-btn { background-color: var(--accent); color: var(--background); border: none; padding: 10px 20px; font-size: 1rem; cursor: pointer; transition: background-color 0.2s; margin-left: 20px; }
+        .checkout-btn:hover { background-color: #7cd3eb; }
+
+        *::-webkit-scrollbar { width: 8px; }
+        *::-webkit-scrollbar-track { background: var(--scrollbar-bg); }
+        *::-webkit-scrollbar-thumb { background-color: var(--scrollbar-thumb); border-radius: 4px; }
+        *::-webkit-scrollbar-thumb:hover { background-color: var(--scrollbar-thumb-hover); }
+
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .main-content { flex-direction: column; max-height: none; gap: 10px; }
+            .item-list { flex: none; width: 100%; max-height: 250px; padding-right: 0; }
+            .item-detail-wrapper { flex: none; width: 100%; max-height: 350px; padding: 15px; }
+            h1 { font-size: 1.5rem; }
+            .header-subtitle { font-size: 0.8rem; }
+            .category-btn { padding: 6px 12px; font-size: 0.8rem; }
+            .item-name { font-size: 0.9rem; }
+            .item-price { font-size: 0.8rem; }
+            .detail-name { font-size: 1.3rem; }
+            .detail-price { font-size: 1rem; }
+            .detail-label, .detail-value { font-size: 0.85rem; }
+            .detail-value { padding: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="protocol-container">
+        <header>
+            <h1>MSP 供应协议</h1>
+            <div class="header-subtitle">Materials & Services Protocol - 物资与服务协议</div>
+            功绩点: <span id="merit-points-display">{{get_message_variable::stat_data.功绩点}}</span> | 指挥官评级: <span id="commander-rating-display">{{get_message_variable::stat_data.指挥官评级}}</span>
+        </header>
+
+        <div class="category-bar" id="category-bar-container">
+            <!-- Categories will be dynamically inserted here -->
+        </div>
+
+        <div class="main-content">
+            <div class="item-list" id="item-list-container"></div>
+            <div class="item-detail-wrapper" id="item-detail-wrapper">
+                <div class="detail-placeholder" id="detail-placeholder">
+                    <p>正在初始化协议...</p>
+                </div>
+                <div class="detail-error" id="detail-error" style="display: none;">
+                    <p>数据流中断或解析失败。<br>请检查输入源是否符合协议格式。</p>
+                </div>
+                <div class="detail-content" id="detail-content-area"></div>
+            </div>
+        </div>
+
+        <div class="cart-container">
+            <h2 class="cart-title">已选择</h2>
+            <div class="cart-items" id="cart-items-container">
+                <!-- Cart items will be dynamically inserted here -->
+            </div>
+            <div class="cart-footer">
+                <div class="cart-total">
+                    <span class="cart-total-label">合计:</span>
+                    <span class="cart-total-price" id="cart-total-price">0</span>
+                </div>
+                <button class="checkout-btn" id="checkout-btn">结算</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="hidden-input-area">
+        <textarea id="data-input">$1</textarea>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dataInput = document.getElementById('data-input');
+            const itemListContainer = document.getElementById('item-list-container');
+            const detailWrapper = document.getElementById('item-detail-wrapper');
+            const detailPlaceholder = document.getElementById('detail-placeholder');
+            const detailError = document.getElementById('detail-error');
+            const detailContentArea = document.getElementById('detail-content-area');
+            const categoryBarContainer = document.getElementById('category-bar-container');
+            const cartItemsContainer = document.getElementById('cart-items-container');
+            const cartTotalPrice = document.getElementById('cart-total-price');
+            const checkoutBtn = document.getElementById('checkout-btn');
+            const meritPointsDisplay = document.getElementById('merit-points-display');
+            const commanderRatingDisplay = document.getElementById('commander-rating-display');
+
+            let cart = [];
+            let allItems = [];
+            let currentTotalCost = 0;
+
+            const ratingLevels = {
+                '新晋指挥官': 1,
+                '认证指挥官': 2,
+                '资深指挥官': 3,
+                '王牌指挥官': 4,
+                '先驱': 5,
+            };
+
+            function mapSortToCategoryKey(sortString) {
+                const mapping = {
+                    '战略物资': 'strategic',
+                    '技术蓝图与许可': 'tech',
+                    '人事调配': 'personnel',
+                    '心智慰藉品': 'consumable'
+                };
+                for (const key in mapping) {
+                    if (sortString.includes(key)) return mapping[key];
+                }
+                return 'other';
+            }
+
+            function initializeProtocol(rawData) {
+                allItems = parseSupplyItems(rawData);
+                if (allItems.length > 0) {
+                    displayCategoryButtons(allItems);
+                    displayItemsList(allItems);
+                    setupCategoryFilters();
+                    clearDetailView();
+                    renderCart();
+                } else {
+                    showError();
+                }
+            }
+
+            function parseSupplyItems(data) {
+                let contentToParse = data;
+                const mspContentMatch = data.match(/<MSP>([\s\S]+?)<\/MSP>/);
+
+                if (mspContentMatch) {
+                    contentToParse = mspContentMatch[1];
+                }
+
+                const parsedItems = [];
+                const itemRegex = /<item>\s*<supply>([\s\S]*?)<\/supply>\s*<sort>([\s\S]*?)<\/sort>\s*<price>([\s\S]*?)<\/price>(?:\s*<unit>([\s\S]*?)<\/unit>)?\s*<info>([\s\S]*?)<\/info>\s*<rank>([\s\S]*?)<\/rank>\s*<\/item>/g;
+                let match;
+
+                while ((match = itemRegex.exec(contentToParse)) !== null) {
+                    const [, supply, sort, price, unit, info, rank] = match.map(s => s ? s.trim() : s);
+
+                    const originalSort = sort || '其他';
+                    const categoryKey = mapSortToCategoryKey(originalSort);
+                    const priceValue = parseFloat(price.replace(/[^0-9.-]+/g,"")) || 0;
+
+                    parsedItems.push({
+                        id: `item-${parsedItems.length}`,
+                        supply: supply,
+                        sort: categoryKey,
+                        originalSort: originalSort,
+                        price: price,
+                        priceValue: priceValue,
+                        unit: unit || null,
+                        info: info || '无详细信息。',
+                        rank: rank || '无'
+                    });
+                }
+                return parsedItems;
+            }
+
+            function displayCategoryButtons(items) {
+                const categories = new Map();
+                categories.set('all', '全部');
+
+                items.forEach(item => {
+                    if (!Array.from(categories.keys()).includes(item.sort)) {
+                        categories.set(item.sort, item.originalSort);
+                    }
+                });
+
+                categoryBarContainer.innerHTML = '';
+                categories.forEach((value, key) => {
+                    const button = document.createElement('button');
+                    button.className = 'category-btn';
+                    button.dataset.category = key;
+                    button.textContent = value;
+                    if (key === 'all') {
+                        button.classList.add('active');
+                    }
+                    categoryBarContainer.appendChild(button);
+                });
+            }
+
+            function displayItemsList(items) {
+                itemListContainer.innerHTML = '';
+                items.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'item-card';
+                    card.id = item.id;
+                    card.dataset.sort = item.sort;
+                    card.innerHTML = `<div class="item-name">${item.supply}</div><div class="item-price">${item.price}</div>`;
+                    card.addEventListener('click', () => {
+                        displayItemDetail(item);
+                        document.querySelectorAll('.item-card').forEach(c => c.classList.remove('active'));
+                        card.classList.add('active');
+                    });
+                    itemListContainer.appendChild(card);
+                });
+            }
+
+            function displayItemDetail(item) {
+                detailPlaceholder.style.display = 'none';
+                detailError.style.display = 'none';
+                detailContentArea.style.display = 'flex';
+
+                let unitHtml = '';
+                if (item.unit) {
+                    unitHtml = `
+                    <div class="detail-section">
+                        <div class="detail-label">单位</div>
+                        <div class="detail-value">${item.unit}</div>
+                    </div>`;
+                }
+
+                detailContentArea.innerHTML = `
+                    <div class="detail-header">
+                        <div class="detail-name">${item.supply}</div>
+                        <div class="detail-price">${item.price}</div>
+                    </div>
+                    <div class="detail-section">
+                        <div class="detail-label">分类</div>
+                        <div class="detail-value">${item.originalSort}</div>
+                    </div>
+                    ${unitHtml}
+                    <div class="detail-section">
+                        <div class="detail-label">信息</div>
+                        <div class="detail-value">${item.info}</div>
+                    </div>
+                    <div class="detail-section">
+                        <div class="detail-label">兑换要求</div>
+                        <div class="detail-value rank-value">${item.rank}</div>
+                    </div>
+                    <div class="detail-section">
+                        <div class="detail-label">数量</div>
+                        <div class="quantity-selector">
+                            <button class="quantity-btn" id="decrease-quantity">-</button>
+                            <input type="number" class="quantity-input" id="quantity-input" value="1" min="1">
+                            <button class="quantity-btn" id="increase-quantity">+</button>
+                        </div>
+                    </div>
+                    <button class="add-to-cart-btn" id="add-to-cart">加入选择</button>`;
+
+                document.getElementById('decrease-quantity').addEventListener('click', () => {
+                    const input = document.getElementById('quantity-input');
+                    let value = parseInt(input.value);
+                    if (value > 1) input.value = value - 1;
+                });
+
+                document.getElementById('increase-quantity').addEventListener('click', () => {
+                    const input = document.getElementById('quantity-input');
+                    input.value = parseInt(input.value) + 1;
+                });
+
+                document.getElementById('add-to-cart').addEventListener('click', () => {
+                    const quantity = parseInt(document.getElementById('quantity-input').value);
+                    addToCart(item, quantity);
+                });
+            }
+
+            function addToCart(item, quantity) {
+                const userRatingText = commanderRatingDisplay.textContent.trim().replace(/['"\[\]]+/g, '');
+                const userRatingLevel = ratingLevels[userRatingText] || 0;
+                const itemRatingText = item.rank.trim();
+                const itemRatingLevel = ratingLevels[itemRatingText] || 0;
+
+                if (userRatingLevel < itemRatingLevel) {
+                    alert('指挥官评级不足!');
+                    return;
+                }
+
+                const existingItem = cart.find(cartItem => cartItem.id === item.id);
+                if (existingItem) {
+                    existingItem.quantity += quantity;
+                } else {
+                    cart.push({ ...item, quantity: quantity });
+                }
+                renderCart();
+            }
+
+            function renderCart() {
+                cartItemsContainer.innerHTML = '';
+                let total = 0;
+                cart.forEach(item => {
+                    const cartItemElement = document.createElement('div');
+                    cartItemElement.className = 'cart-item';
+                    cartItemElement.innerHTML = `
+                        <span class="cart-item-name">${item.supply}</span>
+                        <div class="cart-item-quantity">
+                            <button class="quantity-btn cart-quantity-btn" data-id="${item.id}" data-change="-1">-</button>
+                            <span>${item.quantity}</span>
+                            <button class="quantity-btn cart-quantity-btn" data-id="${item.id}" data-change="1">+</button>
+                        </div>
+                        <span class="cart-item-price">${(item.priceValue * item.quantity).toFixed(2)}</span>
+                    `;
+                    cartItemsContainer.appendChild(cartItemElement);
+                    total += item.priceValue * item.quantity;
+                });
+                currentTotalCost = total;
+                cartTotalPrice.textContent = total.toFixed(2);
+
+                document.querySelectorAll('.cart-quantity-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const itemId = e.target.dataset.id;
+                        const change = parseInt(e.target.dataset.change);
+                        updateCartQuantity(itemId, change);
+                    });
+                });
+            }
+
+            function updateCartQuantity(itemId, change) {
+                const itemIndex = cart.findIndex(item => item.id === itemId);
+                if (itemIndex > -1) {
+                    cart[itemIndex].quantity += change;
+                    if (cart[itemIndex].quantity <= 0) {
+                        cart.splice(itemIndex, 1);
+                    }
+                }
+                renderCart();
+            }
+
+            function setupCategoryFilters() {
+                const categoryButtons = document.querySelectorAll('.category-btn');
+                categoryButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const category = button.dataset.category;
+                        categoryButtons.forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                        const allItemCards = document.querySelectorAll('.item-card');
+                        allItemCards.forEach(card => {
+                            if (category === 'all' || card.dataset.sort === category) {
+                                card.classList.remove('hidden');
+                            } else {
+                                card.classList.add('hidden');
+                            }
+                        });
+                        clearDetailView();
+                    });
+                });
+            }
+
+            function clearDetailView(){
+                detailContentArea.style.display = 'none';
+                detailError.style.display = 'none';
+                detailPlaceholder.style.display = 'block';
+                detailPlaceholder.innerHTML = '<p>← 从列表中选择项目查看详情</p>';
+                document.querySelectorAll('.item-card').forEach(c => c.classList.remove('active'));
+            }
+
+            function showError() {
+                detailContentArea.style.display = 'none';
+                detailPlaceholder.style.display = 'none';
+                detailError.style.display = 'block';
+            }
+
+            function decodeHtml(html) {
+                var txt = document.createElement("textarea");
+                txt.innerHTML = html;
+                return txt.value;
+            }
+
+            checkoutBtn.addEventListener('click', () => {
+                if (cart.length === 0) {
+                    alert('选择为空!');
+                    return;
+                }
+
+                const currentMeritPoints = parseFloat(meritPointsDisplay.textContent) || 0;
+                if (currentMeritPoints < currentTotalCost) {
+                    alert('功绩点不足!');
+                    return;
+                }
+
+                const itemsParts = cart.map(item => {
+                    let unitString = item.unit;
+                    if (!unitString) {
+                        const priceParts = item.price.split('/');
+                        unitString = priceParts.length > 1 ? priceParts[1] : '份';
+                    }
+
+                    const unitMatch = unitString.match(/^(\d*\.?\d+)(.*)$/);
+                    if (unitMatch) {
+                        const unitValue = parseFloat(unitMatch[1]);
+                        const unitName = unitMatch[2] || '';
+                        const totalAmount = item.quantity * unitValue;
+                        return `${item.supply}，${totalAmount}${unitName}`;
+                    } else {
+                        return `${item.supply}，${item.quantity}${unitString}`;
+                    }
+                });
+
+                const checkoutMessage = `花费${currentTotalCost.toFixed(2)}MP，购买清单：${itemsParts.join('；')}。`;
+
+                if (typeof triggerSlash !== 'undefined') {
+                    triggerSlash(`/send ${checkoutMessage}`);
+                    cart = [];
+                    renderCart();
+                } else {
+                    console.log('SillyTavern API (triggerSlash) not found. Data to send:');
+                    console.log(checkoutMessage);
+                    alert('未在SillyTavern环境中运行。请在控制台查看生成的数据。');
+                }
+            });
+
+            const interval = 50, timeout = 2000; let elapsedTime = 0;
+            const dataObserver = setInterval(() => {
+                const rawData = dataInput.value;
+                elapsedTime += interval;
+                if (rawData && rawData.trim() !== '$' + '1') {
+                    clearInterval(dataObserver);
+                    const decodedData = decodeHtml(rawData);
+                    initializeProtocol(decodedData);
+                } else if (elapsedTime >= timeout) {
+                    clearInterval(dataObserver);
+                    showError();
+                }
+            }, interval);
+        });
+    </script>
+</body>
+</html>
+```

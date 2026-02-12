@@ -1,0 +1,260 @@
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>圣柩：指令</title>
+    <style>
+      body {
+        font-family: 'Microsoft YaHei', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #121212; /* 深邃的炭黑色背景 */
+        color: #e0e0e0; /* 柔和的浅灰色文字 */
+        display: flex;
+        justify-content: center;
+        align-items: flex-start; /* Align to top to see start of content */
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+      }
+      .container {
+        background-color: #1e1e1e; /* 比背景稍亮的深灰色 */
+        padding: 30px;
+        border-radius: 0; /* 直角边框 */
+        box-shadow: 0 0 15px rgba(91, 192, 222, 0.1); /* 低调的科技感光晕 */
+        width: 100%;
+        max-width: 800px; /* Increased width for better text flow */
+        border: 1px solid #333; /* 深灰色边框 */
+        margin: auto;
+      }
+      h1 {
+        color: #5bc0de; /* 冷静的青色，科技感 */
+        border-bottom: 1px solid #333; /* 更细、更克制的下划线 */
+        padding-bottom: 10px;
+        text-align: center;
+        font-weight: 400; /* 稍细的字体增加精致感 */
+        margin-bottom: 30px;
+      }
+      /* Style for non-collapsible headers */
+      h2 {
+        color: #5bc0de;
+        border-bottom: 1px solid #333;
+        padding-bottom: 10px;
+        text-align: left;
+        font-weight: 400;
+        margin-top: 30px;
+        margin-bottom: 15px;
+      }
+      p {
+        line-height: 1.7;
+        margin-bottom: 1em;
+        color: #b0b0b0; /* Slightly dimmer text for paragraphs */
+      }
+      /* Collapsible section styles */
+      details {
+        border: 1px solid #333;
+        margin-bottom: 10px;
+        background-color: #1e1e1e;
+        transition: background-color 0.2s;
+      }
+      details[open] {
+        background-color: #2a2a2a;
+      }
+      summary {
+        color: #5bc0de;
+        font-size: 1.1em;
+        font-weight: 400;
+        padding: 15px 20px;
+        cursor: pointer;
+        list-style: none; /* Remove default marker */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background-color 0.2s;
+      }
+      summary:hover {
+        background-color: #333;
+      }
+      summary::-webkit-details-marker {
+        display: none;
+      }
+      .arrow-toggle {
+        font-size: 1em;
+        transition: transform 0.3s ease-out;
+        display: inline-block;
+        font-family: monospace;
+      }
+      details[open] > summary .arrow-toggle {
+        transform: rotate(90deg);
+      }
+      .info-content {
+        padding: 0 20px 15px 20px;
+      }
+      .instructions {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 1em;
+        color: #888;
+      }
+      .scenario-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      button.scenario-option {
+        background-color: transparent;
+        color: #5bc0de;
+        border: 1px solid #5bc0de;
+        padding: 12px 20px;
+        border-radius: 0; /* 直角边框 */
+        cursor: pointer;
+        font-size: 1em;
+        font-weight: bold;
+        transition: background-color 0.3s, color 0.3s;
+        text-transform: uppercase;
+        width: 100%;
+        text-align: left;
+      }
+      button.scenario-option:hover {
+        background-color: #5bc0de;
+        color: #121212;
+      }
+      button.scenario-option.selected {
+        background-color: #007a8a; /* A darker shade for selected */
+        color: #e0e0e0;
+        border-color: #5bc0de;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>圣柩：指令</h1>
+
+      <details>
+        <summary>// 世界观 <span class="arrow-toggle">></span></summary>
+        <div class="info-content">
+          <p>
+            故事发生在一个被人类自己的战争所摧毁的地球，一个名为“尘纪元”的时代。曾经繁荣的文明被无休止的“无主之战”所终结，地表被一种名为“纳米尘”的致命污染物所覆盖，变得不再适宜人类生存。残存的人类文明龟缩于地下深处，而少部分驾驶着巨型移动基地——陆行舰，在地表这片废墟中挣扎求生，试图为人类夺回失去的家园。
+          </p>
+        </div>
+      </details>
+
+      <details>
+        <summary>// 纳米尘 <span class="arrow-toggle">></span></summary>
+        <div class="info-content">
+          <p>
+            纳米尘是由无主纳米机器人组成的漂浮在空气中的尘霾，它主要来源于UWS与ACU的战斗，被摧毁的ACU机器的会泄露本用于修复躯体的大量纳米机器人。
+          </p>
+        </div>
+      </details>
+
+      <details>
+        <summary>// ACU <span class="arrow-toggle">></span></summary>
+        <div class="info-content">
+          <p>
+            ACU是人类文明在崩溃前，为了遏制失控的UWS而启动的最终计划。其设计哲学与UWS截然相反，是“绝对中心化与技术代差”。人类集结了当时最顶尖的科技，创造了一个至高无上的主脑AI，并赋予其对下属所有ACU单位的绝对控制权。ACU的目标并非打赢战争，而是对失控的“变量”（UWS）进行无情的“格式化”。
+          </p>
+        </div>
+      </details>
+
+      <details>
+        <summary>// 陆行舰 <span class="arrow-toggle">></span></summary>
+        <div class="info-content">
+          <p>
+            陆行舰是SRB在地表进行远征的核心战略单位，是集居住、指挥、生产、科研和防御于一体的巨型移动堡垒。它不仅是指挥官与圣柩人形小队在地表唯一的安全港湾，更是衡量一位指挥官实力与功绩最直观的体现。它的每一处设计，都兼顾了军事功能与维系人性的生活需求，是冰冷科技与温暖日常的交融体。
+          </p>
+        </div>
+      </details>
+
+      <details>
+        <summary>// 地下方舟 <span class="arrow-toggle">></span></summary>
+        <div class="info-content">
+          <p>
+            残存的人类躲入深埋地下的巨型地堡或改装的城市废墟中，形成了少数互不干涉的“地下城邦”。在地表文明的灰烬之上，人类最后的幸存者筑起了被称为“方舟”（The Arks）的巨型地下城邦。每一座方舟都是一个独立的、深埋于地下的垂直都市，一个理论上可以实现万年自持的封闭生态系统。然而，它们既是人类文明的火种保存库，也是一个阶级固化、资源紧张、暗流涌动的牢笼。
+          </p>
+        </div>
+      </details>
+
+      <details>
+        <summary>// 地表回收局（SRB） <span class="arrow-toggle">></span></summary>
+        <div class="info-content">
+          <p>
+            为了夺回被“铁血浪潮”和“纳米尘”占据的地表，人类唯一的联合机构——地表回收局（Surface Reclamation Bureau, SRB）应运而生。SRB的核心使命是派遣远征队，清理污染、压制UWS与ACU、回收旧世界技术并寻找潜在的宜居地带。SRB的精英们被称为“前线指挥官”，他们是地面远征的统领。
+          </p>
+        </div>
+      </details>
+
+      <details>
+        <summary>// 摇篮 <span class="arrow-toggle">></span></summary>
+        <div class="info-content">
+          <p>
+            "摇篮"是培养“圣柩人形”的候补者的特殊机构，与SRB是平级机构，负责圣柩少女的相关技术支持。专门培养和教育作为“圣柩人形”的候补者的女性，为她们接受改造手术做准备。学园化的管理模式旨在让这些注定成为兵器的孩子们在相对正常的学园生活中度过童年，然而，她们内心深处都知道自己未来的命运。毕业后，她们会被派遣到各个陆行舰，加入前线指挥官的队伍。“摇篮”会不定期邀请功勋卓著的指挥官与圣柩返回“摇篮”进行宣讲以给予少女们激励与希望。
+          </p>
+        </div>
+      </details>
+
+      <details>
+        <summary>// 圣柩人形（Reliquary Dolls） <span class="arrow-toggle">></span></summary>
+        <div class="info-content">
+          <p>
+            她们是“圣柩计划”的最终产物，拥有人类的思维、情感和记忆，却生活在坚韧的战术人形躯体中。她们是人类在绝境中创造的奇迹与悲剧。她们的思维、记忆和个性都得到了保留，但她们的身体不再是血肉之躯，而是融合了尖端科技的生物机械。为了最大程度维持心智的稳定，在保留基本人体功能的同时，使得她们在外观上与人类少女无太大差异。并且保留了绝大部分的生物功能性结构。区别于传统的机器人有棱有角的外观，圣柩人形们宛如一件浑然天成的艺术品。
+          </p>
+        </div>
+      </details>
+
+      <h2>任务指令</h2>
+      <p class="instructions">选择你的初始任务档案。</p>
+
+      <div class="scenario-list">
+        <button class="scenario-option" data-index="1">档案01：启明星号指挥官与灰雀。</button>
+        <button class="scenario-option" data-index="2">档案02：沙舟号指挥官与赤炎。</button>
+        <button class="scenario-option" data-index="3">档案03：寻路者号指挥官与零。</button>
+        <button class="scenario-option" data-index="4">档案04：填写自定义档案。</button>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const options = document.querySelectorAll('.scenario-option');
+
+        async function switchSwipe(swipeId) {
+          if (typeof SillyTavern === 'undefined' || !SillyTavern.chat || SillyTavern.chat.length === 0) {
+            console.warn('SillyTavern environment not detected. Action will not be executed.');
+            alert('未在SillyTavern环境中运行。');
+            return;
+          }
+
+          const swipeIndex = swipeId;
+
+          if (typeof SillyTavern.chat[0].swipe_id !== 'undefined' && SillyTavern.chat[0].swipe_id !== swipeIndex) {
+            if (SillyTavern.chat[0].swipes && SillyTavern.chat[0].swipes.length > swipeIndex) {
+              SillyTavern.chat[0].swipe_id = swipeIndex;
+              SillyTavern.chat[0].mes = SillyTavern.chat[0].swipes[swipeIndex];
+              await SillyTavern.saveChat();
+              await SillyTavern.reloadCurrentChat();
+              console.log(`Successfully switched to scenario (swipe_id: ${swipeIndex}).`);
+            } else {
+              console.error(`Swipe index ${swipeIndex} is out of bounds or swipes array is missing.`);
+            }
+          } else {
+            console.log(`Scenario ${swipeIndex} is already selected or swipe data is unavailable.`);
+          }
+        }
+
+        options.forEach(button => {
+          button.addEventListener('click', function () {
+            const index = parseInt(this.dataset.index, 10);
+            options.forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            // In SillyTavern, swipes are 0-indexed, but the data-index is 1-based.
+            // The original script used the 1-based index directly, assuming the swipes array
+            // has a dummy element at index 0 or that swipe IDs are 1-based.
+            // Let's stick to the original logic.
+            switchSwipe(index);
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
+```

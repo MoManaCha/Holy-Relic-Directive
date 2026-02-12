@@ -1,0 +1,617 @@
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SRB指挥官档案</title>
+    <style>
+      body {
+        font-family: 'Microsoft YaHei', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #121212; /* 深邃的炭黑色背景 */
+        color: #e0e0e0; /* 柔和的浅灰色文字 */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+      }
+      .container {
+        background-color: #1e1e1e; /* 比背景稍亮的深灰色 */
+        padding: 30px;
+        border-radius: 0; /* 直角边框 */
+        box-shadow: 0 0 15px rgba(91, 192, 222, 0.1); /* 低调的科技感光晕 */
+        width: 100%;
+        max-width: 700px;
+        border: 1px solid #333; /* 深灰色边框 */
+      }
+      h1 {
+        color: #5bc0de; /* 冷静的青色，科技感 */
+        border-bottom: 1px solid #333; /* 更细、更克制的下划线 */
+        padding-bottom: 10px;
+        text-align: center;
+        font-weight: 400; /* 稍细的字体增加精致感 */
+      }
+      h2 {
+        color: #5bc0de; /* 冷静的青色，科技感 */
+        border-bottom: 1px solid #333; /* 更细、更克制的下划线 */
+        padding-bottom: 10px;
+        text-align: left;
+        font-weight: 400; /* 稍细的字体增加精致感 */
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        margin-bottom: 8px;
+        color: #5bc0de; /* 青色标签 */
+        font-weight: bold;
+        font-size: 0.9em;
+        text-transform: uppercase; /* 字母大写增加科技感 */
+      }
+      input[type='text'],
+      textarea,
+      select {
+        width: 100%;
+        padding: 10px;
+        border-radius: 0; /* 直角边框 */
+        border: 1px solid #444; /* 较暗的边框 */
+        background-color: #2a2a2a; /* 深灰色输入框背景 */
+        color: #e0e0e0;
+        box-sizing: border-box;
+        transition: border-color 0.3s, box-shadow 0.3s;
+      }
+      input[type='text']:focus,
+      textarea:focus,
+      select:focus {
+        border-color: #5bc0de; /* 聚焦时变为青色 */
+        box-shadow: 0 0 8px rgba(91, 192, 222, 0.3); /* 聚焦时柔和光晕 */
+        outline: none;
+      }
+      .stats-display {
+        background-color: #2a2a2a;
+        border: 1px solid #444;
+        padding: 15px;
+        border-radius: 0; /* 直角边框 */
+        margin-top: 10px;
+      }
+      .stats-display p {
+        margin: 8px 0;
+        font-size: 1em;
+      }
+      .stats-display strong {
+        color: #5bc0de; /* 青色标题 */
+        min-width: 120px;
+        display: inline-block;
+        font-weight: normal;
+      }
+      button {
+        background-color: transparent;
+        color: #5bc0de;
+        border: 1px solid #5bc0de;
+        padding: 12px 20px;
+        border-radius: 0; /* 直角边框 */
+        cursor: pointer;
+        font-size: 1em;
+        font-weight: bold;
+        transition: background-color 0.3s, color 0.3s;
+        margin-right: 10px;
+        text-transform: uppercase;
+      }
+      button:hover {
+        background-color: #5bc0de;
+        color: #121212;
+      }
+      #output-area {
+        margin-top: 20px;
+      }
+      textarea {
+        height: 200px;
+        resize: vertical;
+      }
+      #gender-select {
+        display: flex;
+        gap: 10px;
+      }
+      #gender-select input[type='radio'] {
+        display: none;
+      }
+      #gender-select label {
+        flex-grow: 1;
+        text-align: center;
+        padding: 8px 15px;
+        border: 1px solid #444;
+        cursor: pointer;
+        transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+        color: #e0e0e0;
+        font-weight: normal;
+        text-transform: none;
+        font-size: 1em;
+        border-radius: 0; /* Keep the rectangular shape */
+      }
+      #gender-select label:hover {
+        background-color: #2a2a2a;
+        border-color: #555;
+      }
+      #gender-select input[type='radio']:checked + label {
+        background-color: #5bc0de;
+        border-color: #5bc0de;
+        color: #121212;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>【SRB-地表开拓计划-指挥官档案】</h1>
+
+      <div id="settings-form">
+        <h2>指挥官身份设定</h2>
+        <div class="form-group">
+          <label for="commander-codename">代号</label>
+          <input type="text" id="commander-codename" placeholder="例如：'幽灵', '响尾蛇', '信使'" />
+          <p style="font-size: 0.8em; color: #888; margin-top: 5px">
+            你在地表行动的唯一标识。一个好的代号，能让友军记住，让敌人胆寒。非必填。
+          </p>
+        </div>
+        <div class="form-group">
+          <label>性别</label>
+          <div id="gender-select">
+            <input type="radio" id="male" name="gender" value="男性" />
+            <label for="male">男性</label>
+            <input type="radio" id="female" name="gender" value="女性" />
+            <label for="female">女性</label>
+            <input type="radio" id="unrecorded" name="gender" value="未记录" checked />
+            <label for="unrecorded">未记录</label>
+          </div>
+          <p style="font-size: 0.8em; color: #888; margin-top: 5px">
+            SRB的人事档案需要记录此项，但地表之上，能力才是唯一的通行证。
+          </p>
+        </div>
+        <div class="form-group">
+          <label for="commander-origin">出身背景</label>
+          <select id="commander-origin">
+            <option value="方舟学院派">方舟学院派</option>
+            <option value="底层幸存者">底层幸存者</option>
+            <option value="旧时代遗孤">旧时代遗孤</option>
+            <option value="偶然的幸存者">偶然的幸存者</option>
+            <option value="custom">自定义...</option>
+          </select>
+          <div id="origin-description" class="stats-display" style="margin-top: 10px">
+            <!-- Description will be loaded here by JS -->
+          </div>
+          <input
+            type="text"
+            id="commander-origin-custom"
+            placeholder="请输入你的自定义出身"
+            style="display: none; margin-top: 10px"
+          />
+        </div>
+
+        <h2>陆行舰设定</h2>
+        <div class="form-group">
+          <label for="landship-name">为你的陆行舰起名</label>
+          <input type="text" id="landship-name" placeholder="例如：'晨曦号' 或 '铁鼠号'" />
+        </div>
+
+        <h2>初始人形设定</h2>
+        <div class="form-group">
+          <label for="personality">性格期望</label>
+          <select id="personality">
+            <option>坚忍领袖型</option>
+            <option>活泼开朗型</option>
+            <option>内向文静型</option>
+            <option>傲娇毒舌型</option>
+            <option>温柔体贴型</option>
+            <option>神秘电波型</option>
+            <option>天然呆路痴型</option>
+            <option>腹黑军师型</option>
+            <option>大和抚子型</option>
+            <option>雌小鬼型</option>
+            <option>病娇型</option>
+            <option>癫狂型</option>
+            <option>搞怪小恶魔型</option>
+            <option>忠犬骑士型</option>
+            <option>三无少女型</option>
+            <option>元气笨蛋型</option>
+            <option>知性研究员型</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="combat-style">作战风格期望</label>
+          <select id="combat-style">
+            <option>突击先锋</option>
+            <option>精准射手</option>
+            <option>战术支援</option>
+            <option>重火力手</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>稀有度与五维能力</label>
+          <button type="button" onclick="generateStats()">随机生成属性</button>
+          <div class="stats-display">
+            <p><strong>稀有度:</strong> <span id="rarity-val">--</span></p>
+            <p><strong>战术执行力:</strong> <span id="stat1-val">--</span></p>
+            <p><strong>素体韧性:</strong> <span id="stat2-val">--</span></p>
+            <p><strong>心智稳定度:</strong> <span id="stat3-val">--</span></p>
+            <p><strong>环境适应性:</strong> <span id="stat4-val">--</span></p>
+            <p><strong>成长潜质:</strong> <span id="stat5-val">--</span></p>
+          </div>
+        </div>
+
+        <h2>舰载AI设定</h2>
+        <div class="form-group">
+          <label for="ai-style">自定义舰载AI风格</label>
+          <select id="ai-style">
+            <option value="标准机械式">标准机械式</option>
+            <option value="精炼专业化">精炼专业化</option>
+            <option value="温和引导式">温和引导式</option>
+            <option value="高度人性化">高度人性化</option>
+            <option value="custom">自定义...</option>
+          </select>
+          <div id="ai-name-display" class="stats-display" style="margin-top: 10px">
+            <!-- AI name will be loaded here -->
+          </div>
+          <input
+            type="text"
+            id="ai-style-custom"
+            placeholder="请输入你的自定义AI风格"
+            style="display: none; margin-top: 10px"
+          />
+        </div>
+
+
+        <button type="button" id="randomize-button">随机</button>
+        <button type="button" id="send-button">确认开启SRB指挥官生涯</button>
+      </div>
+    </div>
+
+    <script>
+      const statGrades = ['D', 'C', 'B', 'A', 'S'];
+
+      function generateStats() {
+        // 1. 定义稀有度及其权重
+        // S: 1/20 = 5%
+        // A: 3/20 = 15%
+        // B: 6/20 = 30%
+        // C: 10/20 = 50%
+        const rarityConfig = [
+          { name: 'C', weight: 10 },
+          { name: 'B', weight: 6 },
+          { name: 'A', weight: 3 },
+          { name: 'S', weight: 1 }, // 1 in 20
+        ];
+
+        // 辅助函数：根据权重随机选择
+        const getWeightedRandom = config => {
+          const totalWeight = config.reduce((sum, item) => sum + item.weight, 0);
+          let random = Math.random() * totalWeight;
+          for (const item of config) {
+            if (random < item.weight) {
+              return item.name;
+            }
+            random -= item.weight;
+          }
+        };
+
+        // 2. 生成稀有度
+        const generatedRarity = getWeightedRandom(rarityConfig);
+
+        // 3. 定义所有可能的属性等级
+        const allGrades = ['D', 'C', 'B', 'A', 'S'];
+        let stats = [];
+
+        // 辅助函数：从池中随机获取一个等级
+        const getRandomGrade = pool => pool[Math.floor(Math.random() * pool.length)];
+
+        // 4. 根据稀有度生成属性
+        switch (generatedRarity) {
+          case 'C':
+            // C级的五维最高为B级
+            const cPool = allGrades.slice(0, 3); // -> ['D', 'C', 'B']
+            stats = Array(5)
+              .fill(null)
+              .map(() => getRandomGrade(cPool));
+            break;
+          case 'B':
+            // B级的五维最高为A级
+            const bPool = allGrades.slice(0, 4); // -> ['D', 'C', 'B', 'A']
+            stats = Array(5)
+              .fill(null)
+              .map(() => getRandomGrade(bPool));
+            break;
+          case 'A':
+            // A级的五维最高为S但有且仅有一个
+            const aPool = allGrades.slice(0, 4); // -> ['D', 'C', 'B', 'A']
+            stats = Array(4)
+              .fill(null)
+              .map(() => getRandomGrade(aPool));
+            stats.push('S');
+            // 洗牌算法打乱数组，确保'S'的位置是随机的
+            for (let i = stats.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [stats[i], stats[j]] = [stats[j], stats[i]];
+            }
+            break;
+          case 'S':
+            // S级的五维最低为B级
+            const sPool = allGrades.slice(2); // -> ['B', 'A', 'S']
+            stats = Array(5)
+              .fill(null)
+              .map(() => getRandomGrade(sPool));
+            break;
+        }
+
+        // 5. 更新界面
+        document.getElementById('rarity-val').textContent = generatedRarity;
+        document.getElementById('stat1-val').textContent = stats[0];
+        document.getElementById('stat2-val').textContent = stats[1];
+        document.getElementById('stat3-val').textContent = stats[2];
+        document.getElementById('stat4-val').textContent = stats[3];
+        document.getElementById('stat5-val').textContent = stats[4];
+      }
+
+      const originData = {
+        方舟学院派: {
+          description: `
+                <p><strong>描述:</strong><br>你出生于秩序井然的地下方舟，是标准的“方舟之子”。从小接受SRB精英教育，在无数次的高度逼真模拟训练中脱颖而出。你对SRB的理念深信不疑，对地表回收事业充满理想主义的热情。你的教科书里有关于ACU的所有数据，你的模拟器里有应对“铁血浪潮”的无数预案。然而，这是你第一次亲眼见到地表的太阳，第一次呼吸到经过过滤但仍带有金属味的空气。</p>
+                <p><strong>初始优势:</strong><br>
+                - 理论扎实: 你对陆行舰的初始设施和基础科技有更深的理解，部分项目研发速度有小幅加成。<br>
+                - SRB信赖: 你与SRB的初始关系更好，更容易申请到标准物资。</p>
+                <p><strong>初始挑战:</strong><br>
+                - 脱离现实: 你对废土的残酷缺乏直观感受，在面对突发、非预案内的状况时，容易陷入思维僵局。<br>
+                - 依赖规则: 倾向于严格遵守SRB的指令，可能会错过一些需要当机立断的宝贵机会。</p>
+            `,
+        },
+        底层幸存者: {
+          description: `
+                <p><strong>描述:</strong><br>你并非来自方舟光鲜亮丽的上层区。你成长于鱼龙混杂、资源匮乏的底层生活区。在那里，规则是用来打破的，生存是唯一的目标。你或许做过拾荒者、黑市商人，甚至是为了几管营养膏而打架的混混。SRB的招募计划对你而言，不是荣耀，而是一张离开无望生活的船票，一场用性命作赌注的豪赌。你懂得如何察言观色，如何用最小的代价换取最大的利益。</p>
+                <p><strong>初始优势:</strong><br>
+                - 废土直觉: 你在搜集资源时有更高的效率，有更高几率发现隐藏的物资。<br>
+                - 坚韧不拔: 你的部队对口粮短缺等负面状态有更高的忍耐力，士气下降得更慢。</p>
+                <p><strong>初始挑战:</strong><br>
+                - 天生多疑: 你对SRB抱有天然的不信任感，初始关系较低，申请高级资源时会受到更多盘查。<br>
+                - 实用主义: 初期你可能更倾向于将圣柩人形视为“工具”，难以建立深度的情感连接。</p>
+            `,
+        },
+        旧时代遗孤: {
+          description: `
+                <p><strong>描述:</strong><br>你的姓氏在“无主之战”前曾显赫一时，或许是某个军事世家、科研巨头的后裔。大崩塌让你家族的一切化为乌有。你在方舟中长大，但伴随你的是家族过往的辉煌与重担，以及那些关于地表、关于ACU、关于战争起源的零星碎片和秘密。你加入SRB，踏上地表，不只是为了人类的未来，更是为了探寻自己家族的命运，找回失落的真相。</p>
+                <p><strong>初始优势:</strong><br>
+                - 传承之物: 你开局会拥有一件独特的、无法制造的旧时代遗物——可能是一件性能超前但难以维护的装备，或是一份指向未知遗迹的残缺数据。<br>
+                - 特定知识: 在探索某些旧世界遗迹时，你有几率触发特殊的剧情或选项。</p>
+                <p><strong>初始挑战:</strong><br>
+                - 过去的阴影: 你的家族历史可能会为你带来意想不到的敌人，或是来自SRB内部的猜忌。<br>
+                - 执念过深: 你的行动有时会过度受到复仇或探寻真相的欲望驱使，可能导致不理智的决策。</p>
+            `,
+        },
+        偶然的幸存者: {
+          description: `
+                <p><strong>描述:</strong><br>你不记得自己来自哪里。你的第一次清醒，是在一个废弃的SRB前哨站的医疗舱里，身边只有一份任命你为指挥官的紧急指令和一艘待命的陆行舰。你的记忆存在大量空白，但你的身体却对战斗和指挥有着不可思议的本能反应。SRB的档案将你列为“事故中的幸存者”，但你自己清楚，事情绝非如此简单。</p>
+                <p><strong>初始优势:</strong><br>
+                - 战斗本能: 你指挥下的圣柩人形在战斗中暴击率有微量提升。<br>
+                - 未知潜质: 你拥有极高的成长性，功绩点获取有小幅加成。</p>
+                <p><strong>初始挑战:</strong><br>
+                - 记忆断层: 你无法回忆起关键的常识或知识，可能在与人形的日常交流或SRB汇报中暴露异常。<br>
+                - 身份疑云: 你需要时刻隐藏自己的失忆状态，同时还要应对SRB对你“背景”的持续观察和试探。</p>
+            `,
+        },
+        custom: {
+          description: '<p>输入你自己的独特背景故事。</p>',
+        },
+      };
+
+      const aiNameData = {
+        '标准机械式': '通用辅助I型',
+        '精炼专业化': '战术优化II型',
+        '温和引导式': '后勤管理III型',
+        '高度人性化': '人格化伴侣IV型',
+      };
+
+      function updateAiName() {
+        const aiStyleSelect = document.getElementById('ai-style');
+        const aiNameDisplay = document.getElementById('ai-name-display');
+        const selectedStyle = aiStyleSelect.value;
+        const aiName = aiNameData[selectedStyle];
+
+        if (aiName) {
+          aiNameDisplay.innerHTML = `<p><strong>AI名称:</strong> <span>${aiName}</span></p>`;
+          aiNameDisplay.style.display = 'block';
+        } else {
+          aiNameDisplay.style.display = 'none';
+        }
+      }
+
+      function updateOriginDescription() {
+        const originSelect = document.getElementById('commander-origin');
+        const descriptionDiv = document.getElementById('origin-description');
+        const customOriginInput = document.getElementById('commander-origin-custom');
+        const selectedOrigin = originSelect.value;
+
+        const data = originData[selectedOrigin];
+        if (!data) return;
+
+        // Update description and custom input visibility
+        if (selectedOrigin === 'custom') {
+          customOriginInput.style.display = 'block';
+        } else {
+          customOriginInput.style.display = 'none';
+        }
+        descriptionDiv.innerHTML = data.description;
+      }
+
+      window.onload = () => {
+        generateStats();
+        updateOriginDescription();
+        updateAiName();
+      };
+
+      function setupCustomInput(selectId, inputId) {
+        const select = document.getElementById(selectId);
+        const customInput = document.getElementById(inputId);
+        select.addEventListener('change', function () {
+          if (this.value === 'custom') {
+            customInput.style.display = 'block';
+          } else {
+            customInput.style.display = 'none';
+          }
+        });
+      }
+
+      document.getElementById('commander-origin').addEventListener('change', updateOriginDescription);
+      setupCustomInput('ai-style', 'ai-style-custom');
+      document.getElementById('ai-style').addEventListener('change', updateAiName);
+
+      document.getElementById('randomize-button').addEventListener('click', () => {
+        // Randomize origin first, which will set the driving force
+        const originSelect = document.getElementById('commander-origin');
+        const maxOriginIndex = originSelect.options.length - 2; // Exclude custom
+        originSelect.selectedIndex = Math.floor(Math.random() * (maxOriginIndex + 1));
+        originSelect.dispatchEvent(new Event('change')); // This will update description and driving force
+
+        // Randomize other selects
+        const otherSelects = ['personality', 'combat-style', 'ai-style'];
+        otherSelects.forEach(id => {
+          const select = document.getElementById(id);
+          const maxIndex =
+            select.options[select.options.length - 1].value === 'custom'
+              ? select.options.length - 2
+              : select.options.length - 1;
+          select.selectedIndex = Math.floor(Math.random() * (maxIndex + 1));
+          select.dispatchEvent(new Event('change'));
+        });
+        generateStats();
+      });
+
+      document.getElementById('send-button').addEventListener('click', async () => {
+        const sendButton = document.getElementById('send-button');
+
+        function getCustomValue(selectId, inputId, name) {
+          const select = document.getElementById(selectId);
+          let value = select.value;
+          if (value === 'custom') {
+            value = document.getElementById(inputId).value;
+            if (!value) {
+              alert(`请输入您的自定义${name}！`);
+              return null;
+            }
+          }
+          return value;
+        }
+
+        const commanderCodename = document.getElementById('commander-codename').value;
+        const commanderGender = document.querySelector('input[name="gender"]:checked').value;
+        const commanderOrigin = getCustomValue('commander-origin', 'commander-origin-custom', '出身');
+        if (!commanderOrigin) return;
+
+        const landshipName = document.getElementById('landship-name').value;
+        const personality = document.getElementById('personality').value;
+        const combatStyle = document.getElementById('combat-style').value;
+
+        let aiStyle = getCustomValue('ai-style', 'ai-style-custom', 'AI风格');
+        if (!aiStyle) return;
+
+        const selectedAiStyleKey = document.getElementById('ai-style').value;
+        const aiName = aiNameData[selectedAiStyleKey] || '自定义';
+
+        const rarity = document.getElementById('rarity-val').textContent;
+        const stat1 = document.getElementById('stat1-val').textContent;
+        const stat2 = document.getElementById('stat2-val').textContent;
+        const stat3 = document.getElementById('stat3-val').textContent;
+        const stat4 = document.getElementById('stat4-val').textContent;
+        const stat5 = document.getElementById('stat5-val').textContent;
+
+        if (rarity === '--') {
+          alert('请先点击“随机生成属性”按钮！');
+          return;
+        }
+
+        let message =
+          `
+### 指挥官身份设定
+- **代号:** ${commanderCodename || '未设定'}
+- **性别:** ${commanderGender}
+- **出身背景:** ${commanderOrigin}
+`.trim() + '\n';
+
+        if (landshipName) {
+          message += `\n### 陆行舰设定\n- **舰船命名:** ${landshipName}\n`;
+        }
+
+        message += `
+### 初始人形设定
+- **性格期望:** ${personality}
+- **作战风格期望:** ${combatStyle}
+- **稀有度:** ${rarity}
+- **人形能力:**
+  - 战术执行力: ${stat1}
+  - 素体韧性: ${stat2}
+  - 心智稳定度: ${stat3}
+  - 环境适应性: ${stat4}
+  - 成长潜质: ${stat5}
+
+### 舰载AI设定
+- **AI风格:** ${aiStyle}
+- **AI名称:** ${aiName}
+
+`.trim();
+
+        // SillyTavern API integration
+        if (
+          typeof triggerSlash !== 'undefined' &&
+          typeof setVariables !== 'undefined' &&
+          typeof getCurrentMessageId !== 'undefined'
+        ) {
+          triggerSlash(`/send ${message}`);
+          await new Promise(r => setTimeout(r, 200)); // Give ST a moment
+
+          const messageId = await getCurrentMessageId();
+          const stat_data = {
+            commander_info: {
+              codename: commanderCodename,
+              gender: commanderGender,
+              origin: commanderOrigin,
+            },
+            doll_setup: {
+              personality_preference: personality,
+              combat_style_preference: combatStyle,
+              rarity: rarity,
+              abilities: {
+                tactical_execution: stat1,
+                frame_tenacity: stat2,
+                mental_stability: stat3,
+                environmental_adaptability: stat4,
+                growth_potential: stat5,
+              },
+            },
+            ship_ai: {
+              style: aiStyle,
+              name: aiName,
+            },
+          };
+
+          if (landshipName) {
+            stat_data.ship_info = { name: landshipName };
+          }
+
+          setVariables(messageId, {
+            srb_custom_start: stat_data,
+          });
+
+          sendButton.textContent = '已发送!';
+          setTimeout(() => {
+            sendButton.textContent = '确认开启SRB指挥官生涯';
+          }, 2000);
+        } else {
+          console.log('SillyTavern API未找到。要发送的数据如下:');
+          console.log(message);
+          alert('未在SillyTavern环境中运行。请在控制台查看生成的数据。');
+        }
+      });
+    </script>
+  </body>
+</html>
+```

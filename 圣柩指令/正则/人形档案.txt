@@ -1,0 +1,391 @@
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人形申请已批准</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Microsoft YaHei', sans-serif; }
+        :root {
+            --background: #1a1a1a; --container-bg: #222; --card-bg: #2c2c2c; --card-hover-bg: #383838;
+            --text-primary: #e0e0e0; --text-secondary: #a0a0a0; --accent: #00aaff; --border-color: #444;
+
+            /* Rarity & Stat Colors */
+            --rank-S: #ffd700; /* Gold */
+            --rank-A: #9b59b6; /* Purple */
+            --rank-B: #3498db; /* Blue */
+            --rank-C: #2ecc71; /* Green */
+            --rank-D: #95a5a6; /* Gray */
+        }
+        body {
+            background-color: var(--background);
+            color: var(--text-primary);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .gacha-container { max-width: 1400px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        header { text-align: center; padding-bottom: 20px; border-bottom: 2px solid var(--accent); width: 100%; }
+        h1 { font-size: 2rem; letter-spacing: 2px; color: var(--accent); }
+        .header-subtitle { font-size: 1rem; margin-top: 5px; color: var(--text-secondary); }
+
+        .main-display { width: 100%; }
+
+        .doll-list-wrapper { width: 100%; display: flex; flex-direction: column; align-items: center; }
+        .doll-list-header { color: var(--text-secondary); margin-bottom: 10px; padding-left: 5px; }
+        .doll-list {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            padding: 10px;
+            width: 100%;
+        }
+
+        .doll-card {
+            background-color: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 0; /* Sharp corners */
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            width: 95%;
+            max-width: 800px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .doll-card:hover { background-color: var(--card-hover-bg); }
+        .doll-card.active {
+            border-color: var(--glow-color, var(--accent));
+            box-shadow: 0 0 20px rgba(var(--glow-rgb), 0.5);
+        }
+
+        .doll-card-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 25px; /* Taller */
+        }
+        .doll-card-code { font-size: 1.2rem; font-weight: bold; }
+        .doll-card-rare { font-size: 0.9rem; font-weight: bold; }
+
+        .detail-content {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+            padding: 0 20px 20px 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, padding 0.5s ease-out;
+        }
+        .doll-card.active .detail-content {
+            display: flex;
+            max-height: 1000px; /* Arbitrary large value */
+            padding: 20px;
+            transition: max-height 0.5s ease-in, padding 0.5s ease-in;
+        }
+
+        .detail-placeholder, .detail-error {
+            color: var(--text-secondary); font-size: 1.2rem; text-align: center;
+            height: 100%; display: flex; align-items: center; justify-content: center;
+        }
+        .detail-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+        .detail-code { font-size: 2rem; }
+        .detail-rare { font-size: 1.5rem; font-weight: bold; padding: 5px 15px; border-radius: 5px; }
+
+        .detail-section { display: flex; flex-direction: column; gap: 8px; }
+        .detail-label { font-size: 0.9rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+        .detail-value { font-size: 1rem; line-height: 1.6; background-color: var(--card-bg); padding: 12px; border-radius: 4px; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; }
+        .stat-item { background-color: var(--card-bg); padding: 15px; border-radius: 5px; text-align: center; }
+        .stat-label { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; }
+        .stat-value { font-size: 1.8rem; font-weight: bold; color: var(--accent); }
+
+        .hidden-input-area { display: none; }
+
+        *::-webkit-scrollbar { width: 8px; }
+        *::-webkit-scrollbar-track { background: var(--container-bg); }
+        *::-webkit-scrollbar-thumb { background-color: #555; border-radius: 4px; }
+        *::-webkit-scrollbar-thumb:hover { background-color: #777; }
+
+        /* Curtain Reveal Styles */
+        .curtain-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2000;
+            display: flex;
+            cursor: pointer;
+        }
+        .curtain-wrapper.revealed {
+            pointer-events: none; /* Allow clicks through after animation */
+        }
+        .curtain-panel {
+            width: 50%;
+            height: 100%;
+            background-color: var(--background);
+            transition: transform 1.2s cubic-bezier(0.86, 0, 0.07, 1);
+        }
+        .curtain-panel.left {
+            transform: translateX(0);
+        }
+        .curtain-panel.right {
+            transform: translateX(0);
+        }
+        .curtain-wrapper.reveal .curtain-panel.left {
+            transform: translateX(-100%);
+        }
+        .curtain-wrapper.reveal .curtain-panel.right {
+            transform: translateX(100%);
+        }
+        .reveal-prompt {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--accent);
+            opacity: 1;
+            transition: opacity 0.5s ease;
+            display: flex;
+        }
+        .curtain-wrapper.reveal .reveal-prompt {
+            opacity: 0;
+        }
+
+        @keyframes jump {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        .reveal-prompt span {
+            display: inline-block;
+            animation: jump 1.6s infinite;
+            margin: 0 2px;
+        }
+
+        .reveal-prompt span:nth-child(1) { animation-delay: 0.0s; }
+        .reveal-prompt span:nth-child(2) { animation-delay: 0.1s; }
+        .reveal-prompt span:nth-child(3) { animation-delay: 0.2s; }
+        .reveal-prompt span:nth-child(4) { animation-delay: 0.3s; }
+        .reveal-prompt span:nth-child(5) { animation-delay: 0.4s; }
+        .reveal-prompt span:nth-child(6) { animation-delay: 0.5s; }
+        .reveal-prompt span:nth-child(7) { animation-delay: 0.6s; }
+        .reveal-prompt span:nth-child(8) { animation-delay: 0.7s; }
+    </style>
+</head>
+<body>
+    <div class="curtain-wrapper" id="curtain-wrapper">
+        <div class="curtain-panel left"></div>
+        <div class="curtain-panel right"></div>
+        <div class="reveal-prompt" id="reveal-prompt">
+            <span>点</span><span>击</span><span>或</span><span>滑</span><span>动</span><span>以</span><span>继</span><span>续</span>
+        </div>
+    </div>
+
+    <div class="gacha-container">
+        <header>
+            <h1>人形申请已批准</h1>
+            <div class="header-subtitle">Gynoid Information Acquisition Protocol</div>
+        </header>
+
+        <div class="main-display">
+            <div class="doll-list-wrapper">
+                <div class="doll-list-header">已获取人形 (点击展开)</div>
+                <div class="doll-list" id="doll-list-container">
+                    <div class="detail-placeholder" id="list-placeholder">
+                        <p>正在连接圣柩网络...</p>
+                    </div>
+                    <!-- Doll cards will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="hidden-input-area">
+        <textarea id="data-input">$1</textarea>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dataInput = document.getElementById('data-input');
+            const dollListContainer = document.getElementById('doll-list-container');
+            const listPlaceholder = document.getElementById('list-placeholder');
+            const curtainWrapper = document.getElementById('curtain-wrapper');
+
+            const rankStyles = {
+                'S': { color: 'var(--rank-S)', name: 'S' },
+                'A': { color: 'var(--rank-A)', name: 'A' },
+                'B': { color: 'var(--rank-B)', name: 'B' },
+                'C': { color: 'var(--rank-C)', name: 'C' },
+                'D': { color: 'var(--rank-D)', name: 'D' }
+            };
+
+            function initialize(rawData) {
+                const allDolls = parseDolls(rawData);
+
+                // Data is ready, wait for user interaction to reveal
+                curtainWrapper.addEventListener('click', () => {
+                    curtainWrapper.classList.add('reveal');
+                    curtainWrapper.classList.add('revealed'); // Disable pointer events after revealing
+
+                    if (allDolls.length > 0) {
+                        setTimeout(() => {
+                            listPlaceholder.style.display = 'none';
+                            displayDollCards(allDolls);
+                        }, 500);
+                    } else {
+                        showError();
+                    }
+                }, { once: true }); // Ensure the event only fires once
+            }
+
+            function parseDolls(data) {
+                const parsedDolls = [];
+                const dollRegex = /<doll>([\s\S]*?)<\/doll>/g;
+                const tagRegex = (tagName) => new RegExp(`<${tagName}>([\\s\\S]*?)<\\/${tagName}>`);
+
+                let dollMatch;
+                while ((dollMatch = dollRegex.exec(data)) !== null) {
+                    const dollContent = dollMatch[1];
+                    const getTagValue = (tagName) => {
+                        const match = dollContent.match(tagRegex(tagName));
+                        return match ? match[1].trim() : 'N/A';
+                    };
+
+                    parsedDolls.push({
+                        id: `doll-${parsedDolls.length}`,
+                        code: getTagValue('code'),
+                        rare: getTagValue('rare'),
+                        looks: getTagValue('looks'),
+                        wear: getTagValue('wear'),
+                        per: getTagValue('per'),
+                        war: getTagValue('war'),
+                        forte: getTagValue('forte'),
+                        armed: getTagValue('armed'),
+                        T: getTagValue('T'),
+                        D: getTagValue('D'),
+                        M: getTagValue('M'),
+                        E: getTagValue('E'),
+                        G: getTagValue('G'),
+                    });
+                }
+                return parsedDolls;
+            }
+
+            function displayDollCards(dolls) {
+                dollListContainer.innerHTML = '';
+                dolls.forEach(doll => {
+                    const card = document.createElement('div');
+                    card.className = 'doll-card';
+                    card.id = doll.id;
+
+                    const rarity = doll.rare.toUpperCase();
+                    const rarityInfo = rankStyles[rarity] || { color: 'var(--text-secondary)', name: rarity };
+
+                    // Function to convert hex to rgb values for the glow
+                    const hexToRgb = (hex) => {
+                        let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                        return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '255, 255, 255';
+                    };
+
+                    card.style.setProperty('--glow-color', rarityInfo.color);
+                    card.style.setProperty('--glow-rgb', hexToRgb(rarityInfo.color));
+                    card.style.borderLeftColor = rarityInfo.color;
+
+                    card.innerHTML = `
+                        <div class="doll-card-summary">
+                            <div class="doll-card-code">${doll.code}</div>
+                            <div class="doll-card-rare" style="color: ${rarityInfo.color};">${rarityInfo.name}</div>
+                        </div>
+                        <div class="detail-content"></div>
+                    `;
+
+                    card.addEventListener('click', () => {
+                        const wasActive = card.classList.contains('active');
+
+                        // Close all cards
+                        document.querySelectorAll('.doll-card').forEach(c => {
+                            c.classList.remove('active');
+                            const content = c.querySelector('.detail-content');
+                            if (content) content.innerHTML = ''; // Clear content to save memory
+                        });
+
+                        // If it wasn't active, open it
+                        if (!wasActive) {
+                            card.classList.add('active');
+                            const detailContent = card.querySelector('.detail-content');
+                            if (detailContent) {
+                                displayDollDetail(doll, detailContent);
+                            }
+                        }
+                    });
+                    dollListContainer.appendChild(card);
+                });
+            }
+
+            function displayDollDetail(doll, container) {
+                const rarity = doll.rare.toUpperCase();
+                const rarityInfo = rankStyles[rarity] || { color: 'var(--text-secondary)', name: rarity };
+
+                const getStatHTML = (label, value) => {
+                    const statRank = value.toUpperCase();
+                    const statInfo = rankStyles[statRank] || { color: 'var(--text-secondary)' };
+                    return `<div class="stat-item"><div class="stat-label">${label}</div><div class="stat-value" style="color: ${statInfo.color};">${value}</div></div>`;
+                };
+
+                container.innerHTML = `
+                    <div class="stats-grid">
+                        ${getStatHTML('战术执行力', doll.T)}
+                        ${getStatHTML('素体韧性', doll.D)}
+                        ${getStatHTML('心智稳定度', doll.M)}
+                        ${getStatHTML('环境适应性', doll.E)}
+                        ${getStatHTML('成长潜质', doll.G)}
+                    </div>
+                    <div class="detail-section"><div class="detail-label">外貌</div><div class="detail-value">${doll.looks}</div></div>
+                    <div class="detail-section"><div class="detail-label">着装</div><div class="detail-value">${doll.wear}</div></div>
+                    <div class="detail-section"><div class="detail-label">性格</div><div class="detail-value">${doll.per}</div></div>
+                    <div class="detail-section"><div class="detail-label">作战风格</div><div class="detail-value">${doll.war}</div></div>
+                    <div class="detail-section"><div class="detail-label">专长</div><div class="detail-value">${doll.forte}</div></div>
+                    <div class="detail-section"><div class="detail-label">人形武装</div><div class="detail-value">${doll.armed}</div></div>
+                `;
+            }
+
+            function showError() {
+                listPlaceholder.innerHTML = '<p>数据接收失败或格式错误。<br>请检查输入源。</p>';
+            }
+
+            function decodeHtml(html) {
+                var txt = document.createElement("textarea");
+                txt.innerHTML = html;
+                return txt.value;
+            }
+
+            const interval = 50, timeout = 2000; let elapsedTime = 0;
+            const dataObserver = setInterval(() => {
+                const rawData = dataInput.value;
+                elapsedTime += interval;
+                if (rawData && rawData.trim() !== '$' + '1') {
+                    clearInterval(dataObserver);
+                    const decodedData = decodeHtml(rawData);
+                    initialize(decodedData);
+                } else if (elapsedTime >= timeout) {
+                    clearInterval(dataObserver);
+                    showError();
+                }
+            }, interval);
+        });
+    </script>
+</body>
+</html>
+
+```
