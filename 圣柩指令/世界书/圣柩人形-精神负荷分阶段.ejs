@@ -4,15 +4,11 @@
   行为指导: [在当前阶段，人形会严格依据行为指导进行表现，这直观地体现了她们的心智状态和潜在风险。]
   变化倾向: [当精神负荷数值接近下一阶段的临界点时，人形会开始展现“变化倾向”中描述的行为，作为其状态即将恶化的预警信号。]
 
-  <%_
-  if (typeof dollList === 'undefined') {
-    var dollList = getvar('stat_data.人形列表.圣柩人形');
-  }
-  if (Array.isArray(dollList)) {
-    dollList.forEach(doll => {
-      if (doll && doll.代号 && Array.isArray(doll.代号) && doll.精神负荷 && Array.isArray(doll.精神负荷)) {
-        const characterName = doll.代号[0];
-        const strainValue = doll.精神负荷[0];
+  <%_ {
+  let dollList = getvar('stat_data.人形列表', { defaults: {} });
+
+  Object.entires(dollLit).forEach(([name, doll]) => {
+    const strainValue = doll.精神负荷
 _%>
   <%= characterName %>:
     associated_variable: 精神负荷 (<%= strainValue %>)
@@ -74,12 +70,9 @@ _%>
         - "素体机能开始紊乱，体表温度异常升高，能源核心读数极不稳定，这是“暴走”的最终前兆。"
         - "完全丧失敌我识别能力，会将所有移动目标视为威胁，其行动逻辑退化为最原始的“生存或毁灭”。"
         - "必须立即采取强制措施，将其送入冷却槽进行紧急心智重置，否则将对全舰人员构成致命威胁。"
-    <%_ } else { _%>
-    <%_   toastr.error(`'${characterName}'的变量'精神负荷'的值 (${strainValue}) 未匹配到任何已知阶段。`) _%>
-    <%_ 
-          } 
-        }
+    <%_ } _%>
+    <%_
       });
     }
-  _%>
+    _%>
 </doll_mental_strain_staged>

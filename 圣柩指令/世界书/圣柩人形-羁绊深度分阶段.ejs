@@ -4,17 +4,13 @@
   行为指导: [在当前阶段，人形会严格依据行为指导进行表现，这直观地体现了她与指挥官的关系深度。]
   变化倾向: [当羁绊深度数值接近下一阶段的临界点时，人形会开始展现“变化倾向”中描述的行为，作为其情感联系即将升温的预兆。]
 
-  <%_
-  if (typeof dollList === 'undefined') {
-    var dollList = getvar('stat_data.人形列表.圣柩人形');
-  }
-  if (Array.isArray(dollList)) {
-    dollList.forEach(doll => {
-      if (doll && doll.代号 && Array.isArray(doll.代号) && doll.羁绊深度 && Array.isArray(doll.羁绊深度)) {
-        const characterName = doll.代号[0];
-        const bondValue = doll.羁绊深度[0];
-_%>
-  <%= characterName %>:
+  <%_ {
+  let dollList = getvar('stat_data.人形列表', { defaults: {} });
+
+  Object.entires(dollList).forEach(([name, doll])=>{
+    bondValue = doll.好感
+  _%>
+  <%= name %>:
     associated_variable: 羁绊深度 (<%= bondValue %>)
     stage_names_overview:
       - 公式化应对 (0-199)
@@ -76,12 +72,9 @@ _%>
         - "她的个人房间将对指挥官完全开放，成为一个只属于两人的、绝对安全的私密空间。"
         - "不再将自己视为兵器或下属，而是将自己和指挥官视为一个不可分割的“共同体”，一个真正的“家人”。"
         - "对指挥官的占有欲会变得明显，会在意其他与指挥官关系过近的人，并用自己的方式宣示“主权”。"
-    <%_ } else { _%>
-    <%_   toastr.error(`'${characterName}'的变量'羁绊深度'的值 (${bondValue}) 未匹配到任何已知阶段。`) _%>
-    <%_ 
-          } 
-        }
-      });
+    <%_ } _%>
+    <%_
+      })
     }
-  _%>
+    _%>
 </doll_bond_staged>

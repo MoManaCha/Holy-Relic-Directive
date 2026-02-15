@@ -124,21 +124,6 @@
       不可激活其他条目: true
     文件: 世界书\变量\变量列表
 
-  - 名称: debug
-    启用: false
-    激活策略:
-      类型: 蓝灯
-    插入位置:
-      类型: 指定深度
-      角色: 系统
-      深度: 1
-      顺序: 100
-    激活概率: 100
-    递归:
-      不可被其他条目激活: true
-      不可激活其他条目: true
-    文件: 世界书\debug
-
   - 名称: 输出格式
     启用: true
     激活策略:
@@ -906,7 +891,7 @@
         启用: true
         类型: 脚本
         内容: import
-          'https://testingcf.jsdelivr.net/gh/MagicalAstrogy/MagVarUpdate@beta/artifact/bundle.js'
+          'https://testingcf.jsdelivr.net/gh/MagicalAstrogy/MagVarUpdate@latest/artifact/bundle.js'
         按钮:
           启用: true
           按钮列表:
@@ -925,7 +910,7 @@
 
       - 名称: 人形战力计算
         id: 592aedb4-9291-4d9e-9ee5-e67892ab0be2
-        启用: true
+        启用: false
         类型: 脚本
         内容: |
           // 注册事件监听器，在所有变量更新完成后触发
@@ -1039,7 +1024,7 @@
 
       - 名称: 数据修正
         id: db96b080-b84a-40f4-b669-60c358ff2d7c
-        启用: true
+        启用: false
         类型: 脚本
         内容: |
           /**

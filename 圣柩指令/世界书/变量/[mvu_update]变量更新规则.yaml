@@ -95,9 +95,9 @@ variables_update_rules:
       type: |-
         {
           [设施名称: string]: {
-            设施等级: string;
-            设施效果: { [效果名: string]: string };
-            设施描述: string;
+            等级: string;
+            效果: { [效果名: string]: string };
+            描述: string;
           }
         }
       check:
