@@ -101,7 +101,7 @@
         <header>
             <h1>MSP 供应协议</h1>
             <div class="header-subtitle">Materials & Services Protocol - 物资与服务协议</div>
-            功绩点: <span id="merit-points-display">{{get_message_variable::stat_data.功绩点}}</span> | 指挥官评级: <span id="commander-rating-display">{{get_message_variable::stat_data.指挥官评级}}</span>
+            功绩点: <span id="merit-points-display">{{get_message_variable::stat_data.主角.功绩点}}</span> | 指挥官评级: <span id="commander-rating-display">{{get_message_variable::stat_data.主角.评级}}</span>
         </header>
 
         <div class="category-bar" id="category-bar-container">

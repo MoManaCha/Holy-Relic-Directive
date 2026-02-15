@@ -81,8 +81,8 @@ variables_update_rules:
     等级数据:
       type: |-
         {
-          [陆巡舰名称: string]: {
-            陆巡舰等级: string;
+          [陆行舰名称: string]: {
+            陆行舰等级: string;
             设施最大数量: number;
             设施等级上限: number;
             武器上限: number;

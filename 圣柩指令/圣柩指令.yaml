@@ -1128,11 +1128,9 @@
 
           console.log('shengju-value-corrector.ts v5.0.0 loaded successfully.');
 
-    变量: {},
-
       - 名称: 圣柩zod
         id: fee7a4fb-9601-4dbb-9998-1a47b4ea8f70
-        启用: false
+        启用: true
         类型: 脚本
         内容: |
           import { registerMvuSchema } from 'https://testingcf.jsdelivr.net/gh/StageDog/tavern_resource/dist/util/mvu_zod.js';
@@ -1203,13 +1201,13 @@
             剧情进度: z.coerce.number().prefault(0),
 
             陆行舰: z.object({
-              等级数据: z.record(z.string().describe('陆巡舰名称'), z.object({
-                陆巡舰等级: z.string().prefault(''),
+              等级数据: z.record(z.string().describe('陆行舰名称'), z.object({
+                陆行舰等级: z.string().prefault(''),
                 设施最大数量: z.coerce.number().prefault(0),
                 设施等级上限: z.coerce.number().prefault(0),
                 武器上限: z.coerce.number().prefault(0),
                 载具上限: z.coerce.number().prefault(0),
-              }).prefault({ 陆巡舰等级: '', 设施最大数量: 0, 设施等级上限: 0, 武器上限: 0, 载具上限: 0 })).prefault({}),
+              }).prefault({ 陆行舰等级: '', 设施最大数量: 0, 设施等级上限: 0, 武器上限: 0, 载具上限: 0 })).prefault({}),
               舰内设施: z.record(z.string().describe('设施名称'), z.object({
                 等级: z.string().prefault(''),
                 效果: 效果Schema,

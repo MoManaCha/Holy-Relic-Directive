@@ -19,39 +19,33 @@
 “怎么，”她终于开口，声音清脆，带着一种居高临下的慵懒腔调，“新来的指挥官，连自己的部下在用这种废铜烂铁都不知道吗？”
 
 <UpdateVariable>
-<Analysis>
-- calculate time passed: Initial interaction, 5 minutes.
-- decide whether dramatic updates are allowed as it's in a special case or the time passed is more than usual: yes, this is a new game start, major changes are required based on user's request.
-- 时间[0]: Y
-- 地点[0]: Y
-- 陆行舰.人形武备库.示例武器.数量[0]: Y
-</Analysis>
-_.set('时间[0]', '2985-05-01 08:00', '2985-05-01 08:05');//Time progression
-_.set('地点[0]', '拓荒者级陆行舰- 舰桥', '拓荒者级陆行舰“沙舟号” - 整备室');//Updated the starting location as requested
-_.set('陆行舰.人形武备库.示例武器.数量[0]', 1, 2);//A new doll has been added, and she is also equipped with this weapon
- _.assign('人形列表.圣柩人形', {
-        "代号": ["赤炎", "首位与指挥官会合的圣柩人形，性格傲娇，拥有极高的成长潜质。"],
-        "稀有度": ["A", "高稀有度，代表其具备优秀的综合素质。"],
-        "精神负荷": [0, "初始状态，心智健康。"],
-        "羁绊深度": [50, "初始阶段，关系为公式化应对。"],
-        "外貌": ["一头如烈焰般耀眼的赤红色长发，金色眼瞳锐利而高傲，身材高挑。", "Distinctive appearance."],
-        "着装": ["紧身黑色作战背心外搭无袖红色短夹克，配以战术长裤和军靴。", "Practical and stylish combat attire."],
-        "性格": ["傲娇毒舌型", "Core personality trait defining her interactions."],
-        "作战风格": ["突击先锋", "Prefers aggressive, frontline combat."],
-        "专长": ["中近距离的火力压制和阵线突破", "Specializes in close-quarters combat and breaking enemy lines."],
-        "人形战力": ["C", "Initial combat power, has great potential for improvement."],
-        "人形武装": {
-            "武装名": ["旧式4型突击步枪", "Standard issue, but considered subpar by her."],
-            "武装等级": [1, "Base level weapon."]
-        },
-        "人形能力": {
-            "战术执行力": ["A", "Excellent at following orders despite her attitude."],
-            "素体韧性": ["A", "High physical durability, suitable for a vanguard role."],
-            "心智稳定度": ["B", "Relatively stable, but her pride can make her emotionally volatile."],
-            "环境适应性": ["B", "Average adaptability to different environments."],
-            "成长潜质": ["S", "Exceptional potential for growth and development."]
-        }
-    });//New doll `赤炎` is officially added to the roster.
+<JSONPatch>
+[
+  { "op": "replace", "path": "/时间", "value": "2985年-05月-01日-08:05" },
+  { "op": "replace", "path": "/地点", "value": "拓荒者级陆行舰"沙舟号" - 整备室" },
+  { "op": "insert", "path": "/人形列表/赤炎", "value": {
+    "稀有度": "A",
+    "精神负荷": 0,
+    "好感": 50,
+    "外貌": "一头如烈焰般耀眼的赤红色长发，金色眼瞳锐利而高傲，身材高挑。",
+    "着装": "紧身黑色作战背心外搭无袖红色短夹克，配以战术长裤和军靴。",
+    "性格": "傲娇毒舌型",
+    "作战风格": "突击先锋",
+    "战损程度": "无损伤",
+    "装备": {
+      "旧式4型突击步枪": { "等级": "1", "类型": "主武器", "效果": {}, "描述": "SRB标准制式突击步枪，枪身布满划痕", "位置": "主手" }
+    },
+    "技能": {},
+    "能力": {
+      "战术执行力": "A",
+      "素体韧性": "A",
+      "心智稳定度": "B",
+      "环境适应性": "B",
+      "成长潜质": "S"
+    }
+  }}
+]
+</JSONPatch>
 </UpdateVariable>
 
 <StatusPlaceHolderImpl/>

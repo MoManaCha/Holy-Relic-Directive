@@ -5,7 +5,9 @@
 
   <%_ {
   let dollList = getvar('stat_data.人形列表', { defaults: {} });
-  Object.entries(dollList).foreEach(([name, doll]) => {
+  if (dollList && typeof dollList === 'object') {
+  Object.entries(dollList).forEach(([name, doll]) => {
+    if (!doll || typeof doll !== 'object') return;
     const personality = doll.性格;
   _%>
 
@@ -131,6 +133,7 @@
   <%_ } _%>
 <%_
     });
+  }
   }
 _%>
 </arkroid_personality_display>

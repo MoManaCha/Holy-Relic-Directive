@@ -650,11 +650,31 @@
         border-color: var(--accent-highlight, #ffc107);
         font-weight: bold;
       }
-      .interaction-actions .action-button.selected {
-        background-color: var(--accent-highlight, #ffc107);
-        color: var(--bg-color, #1a1a1a) !important;
-        border-color: var(--accent-highlight, #ffc107);
-        font-weight: bold;
+
+      /* 工具类：全宽单列属性布局 */
+      .property-full-width {
+        grid-template-columns: 1fr;
+        grid-template-areas: 'name' 'value';
+        gap: 8px;
+      }
+
+      /* 工具类：带顶部分隔线 */
+      .property-bordered {
+        border-top: 1px solid var(--border-color);
+        padding-top: 10px;
+      }
+
+      /* 工具类：左对齐文本容器 */
+      .value-container-left {
+        justify-content: flex-start;
+        display: block;
+        text-align: left;
+      }
+
+      /* 工具类：右对齐文本容器 */
+      .value-container-right {
+        justify-content: flex-end;
+        text-align: right;
       }
     </style>
   </head>
@@ -678,7 +698,7 @@
       <div class="status-grid">
         <!-- Section 1: Global Info -->
         <div class="section">
-          <div class="section-header clickable" onclick="toggleSection(this)">SRB信息</div>
+          <div class="section-header clickable" onclick="toggleSection(this)">信息</div>
           <div class="section-content" style="display: none">
             <div class="property">
               <div class="property-name">功绩点 / 排名</div>
@@ -687,47 +707,55 @@
               </div>
             </div>
             <div class="property">
-              <div class="property-name">指挥官评级</div>
+              <div class="property-name">评级</div>
               <div class="property-value-container">
                 <span class="value-main" id="global-commander-rank">N/A</span>
               </div>
             </div>
-            <div
-              class="property"
-              style="
-                grid-template-columns: 1fr;
-                grid-template-areas: 'name' 'value';
-                gap: 8px;
-                border-top: 1px solid var(--border-color);
-                padding-top: 10px;
-              "
-            >
-              <div class="property-name" style="grid-area: name; color: var(--text-header)">SRB公告</div>
-              <div
-                class="property-value-container"
-                style="grid-area: value; justify-content: flex-start; display: block; text-align: left"
-              >
-                <span class="value-description text-wrap" id="srb-announcement" style="color: var(--text-primary)"
-                  >N/A</span
-                >
+            <div class="property">
+              <div class="property-name">最高功绩</div>
+              <div class="property-value-container">
+                <span class="value-main" id="global-max-merit">N/A</span>
               </div>
             </div>
-            <div
-              class="property"
-              style="
-                grid-template-columns: 1fr;
-                grid-template-areas: 'tabs' 'name' 'value';
-                gap: 8px;
-                border-top: 1px solid var(--border-color);
-                padding-top: 10px;
-              "
-            >
+            <div class="property">
+              <div class="property-name">任务完成数量</div>
+              <div class="property-value-container">
+                <span class="value-main" id="global-mission-count">N/A</span>
+              </div>
+            </div>
+            <div class="property">
+              <div class="property-name">剧情进度</div>
+              <div class="property-value-container">
+                <span class="value-main" id="global-story-progress">N/A</span>
+              </div>
+            </div>
+            <div class="property">
+              <div class="property-name">属性</div>
+              <div class="property-value-container" style="gap: 5px;">
+                <span class="value-description" id="attr-negotiate">交涉:N/A</span>
+                <span class="value-description" id="attr-command">指挥:N/A</span>
+                <span class="value-description" id="attr-aim">瞄准:N/A</span>
+                <span class="value-description" id="attr-intelligence">智力:N/A</span>
+              </div>
+            </div>
+            <div class="property property-full-width property-bordered">
+              <div class="property-name" style="grid-area: name; color: var(--text-header)">技能</div>
+              <div id="protagonist-skills-list" style="grid-area: value; display: block; width: 100%;"></div>
+            </div>
+            <div class="property property-full-width property-bordered">
+              <div class="property-name" style="grid-area: name; color: var(--text-header)">SRB公告</div>
+              <div class="property-value-container value-container-left" style="grid-area: value;">
+                <span class="value-description text-wrap" id="srb-announcement" style="color: var(--text-primary)">N/A</span>
+              </div>
+            </div>
+            <div class="property property-full-width property-bordered" style="grid-template-areas: 'tabs' 'name' 'value';">
               <div class="sort-controls" id="mission-filter-controls" style="grid-area: tabs; margin-bottom: 10px;">
                 <button class="sort-btn active" onclick="filterMissions('all', event)">全部</button>
                 <button class="sort-btn" onclick="filterMissions('主线', event)">主线</button>
                 <button class="sort-btn" onclick="filterMissions('支线', event)">支线</button>
               </div>
-              <div class="property-name" style="grid-area: name; color: var(--text-header);">SRB委派任务</div>
+              <div class="property-name" style="grid-area: name; color: var(--text-header);">任务</div>
               <div id="mission-list" style="grid-area: value; display: block; width: 100%;">
                 <!-- Missions will be dynamically inserted here -->
                 <div class="property">
@@ -746,6 +774,16 @@
             <span>人形列表</span>
           </div>
           <div class="section-content" id="doll-list-content" style="display: none">
+            <!-- This will be populated by JS -->
+          </div>
+        </div>
+
+        <!-- Section: Relationship List -->
+        <div class="section" id="relation-section-container">
+          <div class="section-header clickable" onclick="toggleSection(this)">
+            <span>关系列表</span>
+          </div>
+          <div class="section-content" id="relation-list-content" style="display: none">
             <!-- This will be populated by JS -->
           </div>
         </div>
@@ -806,7 +844,7 @@
         <h2 style="color: var(--text-header);">设施升级</h2>
 
         <div class="upgrade-section">
-          <h3 style="color: var(--text-header);">舰内资源</h3>
+          <h3 style="color: var(--text-header);">陆行舰资源</h3>
           <div id="upgrade-resource-list" class="section-content">
             <!-- Resources will be populated here -->
           </div>
@@ -1057,13 +1095,17 @@
       function openUpgradeModal() {
         if (!statDataCache) return;
         const modal = document.getElementById('upgrade-modal');
-        const currentResources = GetRawValue(statDataCache, '陆行舰.舰内资源', {});
+        const currentResources = GetRawValue(statDataCache, '陆行舰.资源', {});
 
-        // Populate resources
+        // Populate resources (排除武备库和物品库等子对象，只显示基础资源)
         const resourceList = document.getElementById('upgrade-resource-list');
         resourceList.innerHTML = '';
+        const resourceSkipKeys = ['$meta', '武备库', '物品库'];
         for (const resourceName in currentResources) {
-            if (!currentResources.hasOwnProperty(resourceName) || resourceName === '$meta') continue;
+            if (!currentResources.hasOwnProperty(resourceName) || resourceSkipKeys.includes(resourceName)) continue;
+            const rawVal = GetRawValue(currentResources, resourceName);
+            // 跳过非简单值（对象/数组）
+            if (typeof rawVal === 'object' && rawVal !== null) continue;
             const value = SafeGetValue(currentResources, resourceName, '0');
             resourceList.innerHTML += `<div>${resourceName}: <span style="color: var(--text-primary);">${value}</span></div>`;
         }
@@ -1071,8 +1113,11 @@
         // Populate facilities
         const facilityList = document.getElementById('upgrade-facility-list');
         const facilities = GetRawValue(statDataCache, '陆行舰.舰内设施', {});
-        const shipLevelName = SafeGetValue(statDataCache, '陆行舰.陆行舰等级', '拓荒者级');
-        const maxLevel = SafeGetValue(statDataCache, `陆行舰.陆行舰等级数据.${shipLevelName}.设施等级上限`, 3);
+        // 从新变量结构中获取等级数据
+        const upgradeLevelData = GetRawValue(statDataCache, '陆行舰.等级数据', {});
+        const upgradeLevelKeys = Object.keys(upgradeLevelData).filter(k => k !== '$meta');
+        const upgradeLevelInfo = upgradeLevelKeys.length > 0 ? upgradeLevelData[upgradeLevelKeys[0]] : {};
+        const maxLevel = SafeGetValue(upgradeLevelInfo, '设施等级上限', 3);
         facilityList.innerHTML = '';
 
         for (const facilityName in facilities) {
@@ -1124,7 +1169,7 @@
             return;
         }
 
-        const currentResources = GetRawValue(statDataCache, '陆行舰.舰内资源', {});
+        const currentResources = GetRawValue(statDataCache, '陆行舰.资源', {});
         let hasEnoughResources = true;
         let costHtml = '<strong style="margin-bottom: 5px; display: block;">资源消耗:</strong>';
         costList.style.display = 'grid';
@@ -1276,13 +1321,21 @@
         const descriptionDiv = element.querySelector('.item-description');
         if (!descriptionDiv || !statDataCache) return;
 
-        // If description is empty, populate it
-        if (descriptionDiv.innerHTML === '') {
-          const description = SafeGetValue(statDataCache, `${itemPath}.描述`, '没有找到相关描述。');
-          descriptionDiv.innerText = description;
+        // 仅在首次展开时追加描述文本（使用 data 属性标记）
+        if (!descriptionDiv.dataset.loaded) {
+          const description = SafeGetValue(statDataCache, `${itemPath}.描述`, '');
+          if (description) {
+            const descEl = document.createElement('div');
+            descEl.style.marginTop = '4px';
+            descEl.className = 'value-description text-wrap';
+            descEl.style.color = 'var(--text-primary)';
+            descEl.textContent = description;
+            descriptionDiv.appendChild(descEl);
+          }
+          descriptionDiv.dataset.loaded = 'true';
         }
 
-        // Toggle display
+        // 切换显示
         const isVisible = descriptionDiv.style.display === 'block';
         descriptionDiv.style.display = isVisible ? 'none' : 'block';
       }
@@ -1305,15 +1358,73 @@
         };
 
         const rarity = SafeGetValue(dollData, '稀有度', 'C');
-        const dollCombat = SafeGetValue(dollData, '人形战力', 'N/A');
-        const weaponName = SafeGetValue(dollData, '人形武装.武装名', 'N/A');
-        const weaponLevel = SafeGetValue(dollData, '人形武装.武装等级', '1');
+        const damageState = SafeGetValue(dollData, '战损程度', 'N/A');
 
-        const exec = SafeGetValue(dollData, '人形能力.战术执行力', 'D');
-        const tough = SafeGetValue(dollData, '人形能力.素体韧性', 'D');
-        const stable = SafeGetValue(dollData, '人形能力.心智稳定度', 'D');
-        const adapt = SafeGetValue(dollData, '人形能力.环境适应性', 'D');
-        const potential = SafeGetValue(dollData, '人形能力.成长潜质', 'D');
+        // 装备信息 - 完整渲染每个装备的详细信息
+        const equipData = GetRawValue(dollData, '装备', {});
+        const equipNames = Object.keys(equipData).filter(k => k !== '$meta');
+        let equipHtml = '';
+        if (equipNames.length > 0) {
+          equipHtml = equipNames.map(eName => {
+            const eq = equipData[eName];
+            const eLevel = SafeGetValue(eq, '等级', 'N/A');
+            const eType = SafeGetValue(eq, '类型', 'N/A');
+            const ePos = SafeGetValue(eq, '位置', 'N/A');
+            const eDesc = SafeGetValue(eq, '描述', '');
+            const eEffects = GetRawValue(eq, '效果', {});
+            const eParts = [];
+            for (const ek in eEffects) {
+              if (eEffects.hasOwnProperty(ek) && ek !== '$meta') eParts.push(ek + ': ' + eEffects[ek]);
+            }
+            const eText = eParts.length > 0 ? eParts.join('；') : '';
+            return `<div style="margin-bottom: 6px; padding: 4px 0; border-bottom: 1px dashed var(--border-color);">
+              <span class="value-main" style="font-size: 1em;">${eName}</span>
+              <span class="value-description" style="margin-left: 8px;">${eLevel} [${eType}] 位置:${ePos}</span>
+              ${eText ? `<div class="value-description text-wrap" style="color: var(--text-secondary); margin-top: 2px;">效果: ${eText}</div>` : ''}
+              ${eDesc ? `<div class="value-description text-wrap" style="color: var(--text-primary); margin-top: 2px;">${eDesc}</div>` : ''}
+            </div>`;
+          }).join('');
+        } else {
+          equipHtml = '<span class="value-description" style="color: var(--text-primary);">N/A</span>';
+        }
+
+        const exec = SafeGetValue(dollData, '能力.战术执行力', 'D');
+        const tough = SafeGetValue(dollData, '能力.素体韧性', 'D');
+        const stable = SafeGetValue(dollData, '能力.心智稳定度', 'D');
+        const adapt = SafeGetValue(dollData, '能力.环境适应性', 'D');
+        const potential = SafeGetValue(dollData, '能力.成长潜质', 'D');
+
+        // 人形技能列表
+        const dollSkillData = GetRawValue(dollData, '技能', {});
+        const dollSkillKeys = Object.keys(dollSkillData).filter(k => k !== '$meta');
+        let dollSkillsHtml = '';
+        if (dollSkillKeys.length > 0) {
+          dollSkillsHtml = `
+                <div class="property property-full-width property-bordered">
+                    <div class="property-name" style="grid-area: name; color: var(--text-header);">技能</div>
+                    <div style="grid-area: value; width: 100%;">
+                      ${dollSkillKeys.map(sName => {
+                        const s = dollSkillData[sName];
+                        const sLevel = SafeGetValue(s, '等级', 'N/A');
+                        const sType = SafeGetValue(s, '类型', 'N/A');
+                        const sCost = SafeGetValue(s, '消耗', 'N/A');
+                        const sDesc = SafeGetValue(s, '描述', '');
+                        const sEffects = GetRawValue(s, '效果', {});
+                        const eParts = [];
+                        for (const eN in sEffects) {
+                          if (sEffects.hasOwnProperty(eN) && eN !== '$meta') eParts.push(eN + ': ' + sEffects[eN]);
+                        }
+                        const eText = eParts.length > 0 ? eParts.join('；') : '无';
+                        return `<div style="margin-bottom: 6px; padding: 4px 0; border-bottom: 1px dashed var(--border-color);">
+                          <span class="value-main" style="font-size: 1em;">${sName}</span>
+                          <span class="value-description" style="margin-left: 8px;">${sLevel} [${sType}] 消耗:${sCost}</span>
+                          <div class="value-description text-wrap" style="color: var(--text-secondary); margin-top: 2px;">效果: ${eText}</div>
+                          <div class="value-description text-wrap" style="color: var(--text-primary); margin-top: 2px;">${sDesc}</div>
+                        </div>`;
+                      }).join('')}
+                    </div>
+                </div>`;
+        }
 
         return `
             <div class="doll-header" onclick="toggleDollDetails(this)">圣柩人形: ${dollName} <span style="color:${
@@ -1331,7 +1442,7 @@
                     </div>
                 </div>
                 <div class="property">
-                    <div class="property-name">羁绊深度</div>
+                    <div class="property-name">好感</div>
                     <div class="property-value-container">
                         <span class="value-main" id="doll-${dollName}-bond">0</span>
                         <span class="value-description" id="doll-${dollName}-bond-desc"></span>
@@ -1341,9 +1452,15 @@
                     </div>
                 </div>
                 <div class="property">
-                    <div class="property-name">武装 / 战力</div>
+                    <div class="property-name">战损程度</div>
                     <div class="property-value-container">
-                        <span class="value-main" id="doll-${dollName}-combat">${weaponName} Lv.${weaponLevel} / ${dollCombat}</span>
+                        <span class="value-main" id="doll-${dollName}-damage">${damageState}</span>
+                    </div>
+                </div>
+                <div class="property property-full-width">
+                    <div class="property-name" style="grid-area: name;">装备</div>
+                    <div style="grid-area: value; width: 100%;">
+                        ${equipHtml}
                     </div>
                 </div>
                 <div class="property">
@@ -1356,43 +1473,39 @@
                         <span class="value-description" style="color:${gradeColor[potential]}">潜:${potential}</span>
                     </div>
                 </div>
-                <div class="property" style="grid-template-columns: 1fr; grid-template-areas: 'name' 'value'; gap: 8px;">
+                <div class="property property-full-width">
                     <div class="property-name" style="grid-area: name;">外貌</div>
-                    <div class="property-value-container" style="grid-area: value; justify-content: flex-end; text-align: right;">
+                    <div class="property-value-container value-container-right" style="grid-area: value;">
                         <span class="value-description text-wrap" style="color: var(--text-primary);">${SafeGetValue(dollData, '外貌', 'N/A')}</span>
                     </div>
                 </div>
-                <div class="property" style="grid-template-columns: 1fr; grid-template-areas: 'name' 'value'; gap: 8px;">
+                <div class="property property-full-width">
                     <div class="property-name" style="grid-area: name;">着装</div>
-                    <div class="property-value-container" style="grid-area: value; justify-content: flex-end; text-align: right;">
+                    <div class="property-value-container value-container-right" style="grid-area: value;">
                         <span class="value-description text-wrap" style="color: var(--text-primary);">${SafeGetValue(dollData, '着装', 'N/A')}</span>
                     </div>
                 </div>
-                <div class="property" style="grid-template-columns: 1fr; grid-template-areas: 'name' 'value'; gap: 8px;">
+                <div class="property property-full-width">
                     <div class="property-name" style="grid-area: name;">性格</div>
-                    <div class="property-value-container" style="grid-area: value; justify-content: flex-end; text-align: right;">
+                    <div class="property-value-container value-container-right" style="grid-area: value;">
                         <span class="value-description text-wrap" style="color: var(--text-primary);">${SafeGetValue(dollData, '性格', 'N/A')}</span>
                     </div>
                 </div>
-                <div class="property" style="grid-template-columns: 1fr; grid-template-areas: 'name' 'value'; gap: 8px;">
+                <div class="property property-full-width">
                     <div class="property-name" style="grid-area: name;">作战风格</div>
-                    <div class="property-value-container" style="grid-area: value; justify-content: flex-end; text-align: right;">
+                    <div class="property-value-container value-container-right" style="grid-area: value;">
                         <span class="value-description text-wrap" style="color: var(--text-primary);">${SafeGetValue(dollData, '作战风格', 'N/A')}</span>
                     </div>
                 </div>
-                <div class="property" style="grid-template-columns: 1fr; grid-template-areas: 'name' 'value'; gap: 8px;">
-                    <div class="property-name" style="grid-area: name;">专长</div>
-                    <div class="property-value-container" style="grid-area: value; justify-content: flex-end; text-align: right;">
-                        <span class="value-description text-wrap" style="color: var(--text-primary);">${SafeGetValue(dollData, '专长', 'N/A')}</span>
-                    </div>
-                </div>
+                ${dollSkillsHtml}
             </div>
         `;
       }
 
       function createExpandableItemSection(title, sectionData, itemPathPrefix, statusGrid, insertBeforeElement = null) {
         // Do not render if data is missing or empty (ignoring meta)
-        if (!sectionData || typeof sectionData !== 'object' || Object.keys(sectionData).filter(k => k !== '$meta' && SafeGetValue(sectionData[k], '名称', '') !== '').length === 0) {
+        // 新变量结构中，key 本身就是名称，内部没有 '名称' 字段
+        if (!sectionData || typeof sectionData !== 'object' || Object.keys(sectionData).filter(k => k !== '$meta').length === 0) {
             return;
         }
 
@@ -1408,11 +1521,38 @@
             if (!sectionData.hasOwnProperty(itemKey) || itemKey === '$meta') continue;
 
             const item = sectionData[itemKey];
-            const itemName = SafeGetValue(item, '名称', '');
-            // Skip empty/placeholder items
-            if (itemName === '') continue;
-
+            const itemName = itemKey;
             const itemStatus = SafeGetValue(item, '状态', '未知');
+            const itemLevel = SafeGetValue(item, '等级', '');
+            const itemType = SafeGetValue(item, '类型', '');
+
+            // 构建效果文本
+            const itemEffects = GetRawValue(item, '效果', {});
+            const effectParts = [];
+            for (const ek in itemEffects) {
+              if (itemEffects.hasOwnProperty(ek) && ek !== '$meta') effectParts.push(ek + ': ' + itemEffects[ek]);
+            }
+            const effectText = effectParts.length > 0 ? effectParts.join('；') : '';
+
+            // 构建装备子列表（机库载具有装备）
+            const subEquipData = GetRawValue(item, '装备', {});
+            const subEquipKeys = Object.keys(subEquipData).filter(k => k !== '$meta');
+            let subEquipHtml = '';
+            if (subEquipKeys.length > 0) {
+              subEquipHtml = '<div style="margin-top: 6px; padding-left: 8px; border-left: 2px solid var(--border-color);">';
+              subEquipKeys.forEach(seKey => {
+                const se = subEquipData[seKey];
+                const seLevel = SafeGetValue(se, '等级', 'N/A');
+                const seType = SafeGetValue(se, '类型', 'N/A');
+                const sePos = SafeGetValue(se, '位置', '');
+                subEquipHtml += `<div style="margin-bottom: 4px;"><span style="color: var(--text-header);">${seKey}</span> <span class="value-description">${seLevel} [${seType}]${sePos ? ' 位置:' + sePos : ''}</span></div>`;
+              });
+              subEquipHtml += '</div>';
+            }
+
+            // 标题行附加信息
+            const levelInfo = itemLevel ? ` Lv.${itemLevel}` : '';
+            const typeInfo = itemType ? ` [${itemType}]` : '';
 
             const itemEl = document.createElement('div');
             itemEl.className = 'property';
@@ -1420,11 +1560,14 @@
             const itemPath = `${itemPathPrefix}.${itemKey}`;
             itemEl.setAttribute('onclick', `toggleItemDescription(this, '${itemPath}')`);
             itemEl.innerHTML = `
-                <div class="property-name" style="text-transform: none;">${itemName}</div>
+                <div class="property-name" style="text-transform: none;">${itemName}<span class="value-description" style="margin-left: 8px;">${levelInfo}${typeInfo}</span></div>
                 <div class="property-value-container">
                     <span class="value-main" style="font-size: 1em; color: ${itemStatus === '良好' ? 'var(--accent-bond)' : 'var(--accent-warning)'};">${itemStatus}</span>
                 </div>
-                <div class="item-description"></div>
+                <div class="item-description">
+                  ${effectText ? `<div style="margin-bottom: 4px;">效果: ${effectText}</div>` : ''}
+                  ${subEquipHtml}
+                </div>
             `;
             contentEl.appendChild(itemEl);
         }
@@ -1439,6 +1582,22 @@
         }
       }
 
+      // 辅助函数：将人形列表对象转换为数组（新变量结构中人形列表是对象，key是代号）
+      function getDollListAsArray(statData) {
+        const dollObj = GetRawValue(statData, '人形列表', {});
+        if (!dollObj || typeof dollObj !== 'object') return [];
+        const result = [];
+        for (const code in dollObj) {
+          if (!dollObj.hasOwnProperty(code) || code === '$meta') continue;
+          let dollData = dollObj[code];
+          if (dollData && typeof dollData === 'object') {
+            dollData._代号 = code; // 注入代号作为内部标识
+            result.push(dollData);
+          }
+        }
+        return result;
+      }
+
       function renderDollList(dollList) {
         const dollContentWrapper = document.getElementById('doll-list-content');
         dollContentWrapper.innerHTML = ''; // Clear previous content
@@ -1448,8 +1607,7 @@
         sortControls.className = 'sort-controls';
         sortControls.innerHTML = `
             <button class="sort-btn" onclick="sortDolls('rarity', event)">稀有度</button>
-            <button class="sort-btn" onclick="sortDolls('combat', event)">战力</button>
-            <button class="sort-btn" onclick="sortDolls('bond', event)">羁绊</button>
+            <button class="sort-btn" onclick="sortDolls('bond', event)">好感</button>
         `;
         dollContentWrapper.appendChild(sortControls);
 
@@ -1462,7 +1620,7 @@
         if (Array.isArray(dollList)) {
             dollList.forEach(dollData => {
               if (typeof dollData !== 'object' || dollData === null) return; // Skip meta strings etc.
-              const dollName = SafeGetValue(dollData, '代号', null);
+              const dollName = dollData._代号 || SafeGetValue(dollData, '代号', null);
               if (!dollName) return;
 
               const dollElement = document.createElement('div');
@@ -1501,7 +1659,7 @@
                 `doll-${dollName}-bond-bar`,
                 `doll-${dollName}-bond`,
                 `doll-${dollName}-bond-desc`,
-                SafeGetValue(dollData, '羁绊深度', 0),
+                SafeGetValue(dollData, '好感', 0),
                 0,
                 10000,
                 dollBondStages,
@@ -1520,8 +1678,8 @@
             currentSort.direction = 'desc'; // Default to descending for new sort key
         }
 
-        let dollList = GetRawValue(statDataCache, '人形列表.圣柩人形', []);
-        if (!Array.isArray(dollList)) return;
+        let dollList = getDollListAsArray(statDataCache);
+        if (!Array.isArray(dollList) || dollList.length === 0) return;
 
         const rarityOrder = { 'C': 0, 'B': 1, 'A': 2, 'S': 3, 'SS': 4, 'SSS': 5 };
 
@@ -1532,13 +1690,9 @@
                     valA = rarityOrder[SafeGetValue(a, '稀有度', 'C')] || 0;
                     valB = rarityOrder[SafeGetValue(b, '稀有度', 'C')] || 0;
                     break;
-                case 'combat':
-                    valA = parseInt(SafeGetValue(a, '人形战力', '0'), 10);
-                    valB = parseInt(SafeGetValue(b, '人形战力', '0'), 10);
-                    break;
                 case 'bond':
-                    valA = parseInt(SafeGetValue(a, '羁绊深度', '0'), 10);
-                    valB = parseInt(SafeGetValue(b, '羁绊深度', '0'), 10);
+                    valA = parseInt(SafeGetValue(a, '好感', '0'), 10);
+                    valB = parseInt(SafeGetValue(b, '好感', '0'), 10);
                     break;
                 default:
                     return 0;
@@ -1560,7 +1714,7 @@
 
         const filteredMissions = missionCache.filter(mission => {
             if (currentMissionFilter === 'all') return true;
-            return SafeGetValue(mission, '任务类型', '') === currentMissionFilter;
+            return SafeGetValue(mission, '类型', '') === currentMissionFilter;
         });
 
         if (filteredMissions.length === 0) {
@@ -1574,24 +1728,23 @@
         }
 
         filteredMissions.forEach(missionData => {
-            const missionName = SafeGetValue(missionData, '任务名', '');
-            const missionLevel = SafeGetValue(missionData, '任务等级', '');
-            const missionObjective = SafeGetValue(missionData, '任务目标', '');
-            const missionReward = SafeGetValue(missionData, '任务奖励', '');
-            const missionType = SafeGetValue(missionData, '任务类型', '');
+            const missionName = missionData._任务名 || '';
+            const missionBrief = SafeGetValue(missionData, '简介', '');
+            const missionObjective = SafeGetValue(missionData, '目标', '');
+            const missionReward = SafeGetValue(missionData, '奖励', '');
+            const missionType = SafeGetValue(missionData, '类型', '');
 
             const missionElement = document.createElement('div');
-            missionElement.classList.add('property');
-            missionElement.style.cssText =
-              "grid-template-columns: 1fr; grid-template-areas: 'name' 'value'; gap: 8px; border-top: 1px solid var(--border-color); padding-top: 10px;";
+            missionElement.classList.add('property', 'property-full-width', 'property-bordered');
 
             const typeColor = missionType === '主线' ? 'var(--accent-danger)' : 'var(--accent-bond)';
 
             missionElement.innerHTML = `
               <div class="property-name" style="grid-area: name; font-size: var(--font-size-lg); color: var(--text-header);">
-                ${missionName} <span style="color: ${typeColor};">[${missionType}]</span> <span style="color: var(--accent-warning);">[${missionLevel}]</span>
+                ${missionName} <span style="color: ${typeColor};">[${missionType}]</span>
               </div>
               <div class="property-value-container" style="grid-area: value; flex-direction: column; align-items: flex-start; text-align: left; gap: 5px;">
+                <span class="value-description text-wrap" style="color: var(--text-secondary);">简介: ${missionBrief}</span>
                 <span class="value-description text-wrap" style="color: var(--text-primary);">目标: ${missionObjective}</span>
                 <span class="value-description text-wrap" style="color: var(--accent-bond);">奖励: ${missionReward}</span>
               </div>
@@ -1602,29 +1755,26 @@
 
       async function initDisplay() {
         try {
-          const messages = await getChatMessages(getCurrentMessageId());
-          if (!messages || messages.length === 0 || !messages[0].data) {
+          const messageVars = getVariables({type: 'message', message_id: 'latest'});
+          if (!messageVars || !messageVars.stat_data) {
             document.getElementById('status-display').innerHTML =
-              "<p style='color:red;padding:10px;'>无法加载状态数据 (messages empty)</p>";
-            return;
-          }
-          const gameData = messages[0].data;
-          const characterData = gameData.display_data || gameData.stat_data;
-          if (!characterData) {
-            document.getElementById('status-display').innerHTML =
-              "<p style='color:red;padding:10px;'>无法加载状态数据 (characterData missing)</p>";
+              "<p style='color:red;padding:10px;'>无法加载状态数据 (stat_data missing)</p>";
             return;
           }
 
           // --- Global Info ---
-          const statData = gameData.stat_data;
+          const statData = messageVars.stat_data;
           statDataCache = statData; // Cache the data
 
           // 清理旧的动态舰船分区，防止升级后刷新时重复创建
           document.querySelectorAll('.dynamic-ship-section').forEach(el => el.remove());
 
           // --- Themeing ---
-          const shipType = SafeGetValue(statData, '陆行舰.陆行舰等级', '拓荒者级');
+          // 从陆行舰.等级数据中提取舰级信息用于主题
+          const themeShipLevelData = GetRawValue(statData, '陆行舰.等级数据', {});
+          const themeShipKeys = Object.keys(themeShipLevelData).filter(k => k !== '$meta');
+          const themeShipLevelInfo = themeShipKeys.length > 0 ? themeShipLevelData[themeShipKeys[0]] : {};
+          const shipType = SafeGetValue(themeShipLevelInfo, '陆行舰等级', '拓荒者级');
           const body = document.body;
           body.classList.remove('theme-pioneer', 'theme-expedition', 'theme-dominator'); // Clear old themes
           if (shipType === '远征军级') {
@@ -1639,15 +1789,77 @@
           document.getElementById('global-location').innerText = SafeGetValue(statData, '地点', 'N/A');
           document.getElementById('global-weather').innerText = SafeGetValue(statData, '天气', 'N/A');
           document.getElementById('global-pollution').innerText = SafeGetValue(statData, '纳米尘污染等级', 'N/A');
-          const merit = SafeGetValue(statData, '功绩点', '0');
-          const rank = SafeGetValue(statData, '功绩排名', '未排名');
+          const merit = SafeGetValue(statData, '主角.功绩点', '0');
+          const rank = SafeGetValue(statData, '主角.功绩排名', '未排名');
           document.getElementById('global-merit').innerText = `${merit} / ${rank}`;
-          document.getElementById('global-commander-rank').innerText = SafeGetValue(statData, '指挥官评级', '新晋指挥官');
-          document.getElementById('srb-announcement').innerText = SafeGetValue(statData, 'SRB公告', '无');
+          document.getElementById('global-commander-rank').innerText = SafeGetValue(statData, '主角.评级', '新晋指挥官');
+          document.getElementById('global-max-merit').innerText = SafeGetValue(statData, '主角.最高功绩', '0');
+          document.getElementById('global-mission-count').innerText = SafeGetValue(statData, '主角.任务完成数量', '0');
+          document.getElementById('global-story-progress').innerText = SafeGetValue(statData, '剧情进度', '0');
+
+          // --- 主角四维属性 ---
+          const attrMap = { '交涉': 'attr-negotiate', '指挥': 'attr-command', '瞄准': 'attr-aim', '智力': 'attr-intelligence' };
+          for (const [attrName, elId] of Object.entries(attrMap)) {
+            const val = SafeGetValue(statData, `主角.属性.${attrName}`, 'N/A');
+            document.getElementById(elId).innerText = `${attrName}:${val}`;
+          }
+
+          // --- 主角技能列表 ---
+          const skillsContainer = document.getElementById('protagonist-skills-list');
+          const skillsData = GetRawValue(statData, '主角.技能', {});
+          skillsContainer.innerHTML = '';
+          const skillKeys = Object.keys(skillsData).filter(k => k !== '$meta');
+          if (skillKeys.length === 0) {
+            skillsContainer.innerHTML = '<div class="property"><div class="property-value-container" style="justify-content: flex-start; grid-column: 1 / -1;"><span class="value-main">无</span></div></div>';
+          } else {
+            skillKeys.forEach(skillName => {
+              const skill = skillsData[skillName];
+              const skillLevel = SafeGetValue(skill, '等级', 'N/A');
+              const skillType = SafeGetValue(skill, '类型', 'N/A');
+              const skillDesc = SafeGetValue(skill, '描述', '');
+              const skillEffects = GetRawValue(skill, '效果', {});
+              const effectParts = [];
+              for (const eName in skillEffects) {
+                if (skillEffects.hasOwnProperty(eName) && eName !== '$meta') {
+                  effectParts.push(`${eName}: ${skillEffects[eName]}`);
+                }
+              }
+              const effectText = effectParts.length > 0 ? effectParts.join('；') : '无';
+
+              const el = document.createElement('div');
+              el.style.cssText = 'border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 8px;';
+              el.innerHTML = `
+                <div class="doll-header" onclick="toggleDollDetails(this)" style="border-top: none; padding-top: 0; margin-top: 0;">
+                  ${skillName} <span style="color: var(--accent-highlight); font-size: 0.9em;">${skillLevel} [${skillType}]</span>
+                </div>
+                <div class="doll-content" style="padding: 8px 5px; display: none;">
+                  <span class="value-description text-wrap" style="color: var(--text-secondary);">效果: ${effectText}</span><br>
+                  <span class="value-description text-wrap" style="color: var(--text-primary); margin-top: 4px; display: inline-block;">${skillDesc}</span>
+                </div>
+              `;
+              skillsContainer.appendChild(el);
+            });
+          }
+
+          // SRB公告 - 动态遍历资讯.SRB公告中所有 key
+          const srbBulletin = GetRawValue(statData, '资讯.SRB公告', {});
+          let srbAnnouncementText = '无';
+          if (srbBulletin && typeof srbBulletin === 'object' && !Array.isArray(srbBulletin)) {
+            const bulletinParts = [];
+            for (const key in srbBulletin) {
+              if (!srbBulletin.hasOwnProperty(key) || key === '$meta') continue;
+              const val = SafeGetValue(srbBulletin, key, '');
+              if (val && val !== 'N/A' && val !== '') {
+                bulletinParts.push(`【${key}】${val}`);
+              }
+            }
+            srbAnnouncementText = bulletinParts.length > 0 ? bulletinParts.join('\n') : '无';
+          }
+          document.getElementById('srb-announcement').innerText = srbAnnouncementText;
 
           // --- Missions ---
           missionCache = []; // Reset cache
-          let missionsObject = GetRawValue(statData, 'SRB委派任务', null);
+          let missionsObject = GetRawValue(statData, '任务列表', null);
           if (missionsObject && Array.isArray(missionsObject)) {
             missionsObject = missionsObject[0];
           }
@@ -1661,7 +1873,10 @@
                 singleTaskData = singleTaskData[0];
               }
 
-              if (singleTaskData && typeof singleTaskData === 'object' && SafeGetValue(singleTaskData, '任务名', '').trim() !== '') {
+              // 新变量结构：任务名是key，内部有 类型/简介/目标/奖励
+              if (singleTaskData && typeof singleTaskData === 'object') {
+                // 将任务名从key注入到对象中，兼容渲染逻辑
+                singleTaskData._任务名 = key;
                 missionCache.push(singleTaskData);
               }
             }
@@ -1669,7 +1884,7 @@
 
           // Dynamically create filter buttons
           const filterControls = document.getElementById('mission-filter-controls');
-          const missionTypes = ['all', ...new Set(missionCache.map(m => SafeGetValue(m, '任务类型', '')).filter(t => t))];
+          const missionTypes = ['all', ...new Set(missionCache.map(m => SafeGetValue(m, '类型', '')).filter(t => t))];
 
           if (!missionTypes.includes(currentMissionFilter)) {
               currentMissionFilter = 'all';
@@ -1698,34 +1913,25 @@
 
           // --- Ship Log ---
           const shipLogContainer = document.getElementById('ship-log-content');
-          const shipLogData = GetRawValue(statData, '陆行舰.舰上信息', {});
+          const shipLogData = GetRawValue(statData, '资讯.舰上信息', {});
           shipLogContainer.innerHTML = ''; // Clear content
 
           if (shipLogData && typeof shipLogData === 'object' && !Array.isArray(shipLogData)) {
-            const logTitles = {
-              '人形日常': '人形日常',
-              '最近战报': '最近战报',
-              'AI建议': 'AI建议',
-              '指挥官动向': '指挥官动向'
-            };
-
             let isFirst = true;
-            for (const key in logTitles) {
-              if (logTitles.hasOwnProperty(key)) {
-                const value = SafeGetValue(shipLogData, key, '无');
-                const logEntry = document.createElement('div');
-                // Add a border to all but the first entry
-                const headerStyle = isFirst ? 'margin-top: 0; padding-top: 0; border-top: none;' : 'border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 10px;';
+            for (const key in shipLogData) {
+              if (!shipLogData.hasOwnProperty(key) || key === '$meta') continue;
+              const value = SafeGetValue(shipLogData, key, '无');
+              const logEntry = document.createElement('div');
+              const headerStyle = isFirst ? 'margin-top: 0; padding-top: 0; border-top: none;' : 'border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 10px;';
 
-                logEntry.innerHTML = `
-                    <div class="doll-header" onclick="toggleDollDetails(this)" style="${headerStyle}">${logTitles[key]}</div>
-                    <div class="doll-content" style="padding: 10px 5px; display: none;">
-                        <span class="value-description text-wrap" style="color: var(--text-primary);">${value || '无'}</span>
-                    </div>
-                `;
-                shipLogContainer.appendChild(logEntry);
-                isFirst = false;
-              }
+              logEntry.innerHTML = `
+                  <div class="doll-header" onclick="toggleDollDetails(this)" style="${headerStyle}">${key}</div>
+                  <div class="doll-content" style="padding: 10px 5px; display: none;">
+                      <span class="value-description text-wrap" style="color: var(--text-primary);">${value || '无'}</span>
+                  </div>
+              `;
+              shipLogContainer.appendChild(logEntry);
+              isFirst = false;
             }
           } else {
              // Fallback for old string format or unexpected array
@@ -1740,19 +1946,33 @@
           }
 
           // --- Ship Info ---
-          const shipName = SafeGetValue(statData, '陆行舰.陆行舰等级', '拓荒者级');
-          document.getElementById('ship-name').innerText = `陆行舰 “${shipName}”`;
-          document.getElementById('ship-type').innerText = shipName;
-          const shipAI = GetRawValue(statData, '陆行舰.舰载AI', {});
-          const aiName = SafeGetValue(shipAI, '名称', '无');
-          const aiStyle = SafeGetValue(shipAI, '风格', '未知风格').split('：')[0]; // 只取“：”之前的部分
-          document.getElementById('ship-ai').innerText = `${aiName} / ${aiStyle}`;
-          document.getElementById('ship-core').innerText = SafeGetValue(statData, '陆行舰.能源核心', 'N/A');
+          // 新变量结构：陆行舰等级信息在 陆行舰.等级数据 中，key是舰名
+          const shipLevelData = GetRawValue(statData, '陆行舰.等级数据', {});
+          const shipLevelKeys = Object.keys(shipLevelData).filter(k => k !== '$meta');
+          const shipName = shipLevelKeys.length > 0 ? shipLevelKeys[0] : '未知';
+          const shipLevelInfo = shipLevelKeys.length > 0 ? shipLevelData[shipName] : {};
+          const shipLevel = SafeGetValue(shipLevelInfo, '陆行舰等级', '拓荒者级');
+          document.getElementById('ship-name').innerText = `陆行舰 "${shipName}"`;
+          document.getElementById('ship-type').innerText = shipLevel;
+          // 舰载AI数据从 message 变量的 extraData.舰载AI 中读取
+          const aiNameMap = {
+            '标准机械式': '通用辅助I型',
+            '精炼专业化': '战术优化II型',
+            '温和引导式': '后勤管理III型',
+            '高度人性化': '人格化伴侣IV型'
+          };
+          try {
+            const shipAI = GetRawValue(messageVars, 'extraData.舰载AI', null) || {};
+            const aiStyle = SafeGetValue(shipAI, '风格', '标准机械式');
+            const aiName = SafeGetValue(shipAI, '名称', aiNameMap[aiStyle] || '通用辅助I型');
+            document.getElementById('ship-ai').innerText = `${aiName} / ${aiStyle}`;
+          } catch(e) {
+            document.getElementById('ship-ai').innerText = `${aiNameMap['标准机械式']} / 标准机械式`;
+          }
 
           // --- Ship Limits ---
-          const shipLevelDataPath = `陆行舰.陆行舰等级数据.${shipName}`;
-          const facilityCap = SafeGetValue(statData, `${shipLevelDataPath}.设施最大数量`, 'N/A');
-          const levelCap = SafeGetValue(statData, `${shipLevelDataPath}.设施等级上限`, 'N/A');
+          const facilityCap = SafeGetValue(shipLevelInfo, '设施最大数量', 'N/A');
+          const levelCap = SafeGetValue(shipLevelInfo, '设施等级上限', 'N/A');
           document.getElementById('ship-level-cap').innerText = `Lv.${levelCap}`;
 
           // --- Ship Facilities (Dynamic) ---
@@ -1795,29 +2015,29 @@
           const shipSection = document.getElementById('ship-name-container').parentElement;
 
           // --- Landship Armaments & Hangar ---
-          const armamentsData = GetRawValue(statData, '陆行舰.陆行舰载武装', {});
-          const hangarData = GetRawValue(statData, '陆行舰.陆行舰机库', {});
-          const shipLevelData = GetRawValue(statData, `陆行舰.陆行舰等级数据.${shipName}`, {});
-          const armamentCap = GetRawValue(shipLevelData, '武器上限', 'N/A');
-          const hangarCap = GetRawValue(shipLevelData, '载具上限', 'N/A');
-          const armamentsCount = Object.keys(armamentsData).filter(k=>k!=='$meta' && SafeGetValue(armamentsData[k], '名称', '') !== '').length;
-          const hangarCount = Object.keys(hangarData).filter(k=>k!=='$meta' && SafeGetValue(hangarData[k], '名称', '') !== '').length;
+          const armamentsData = GetRawValue(statData, '陆行舰.舰载武装', {});
+          const hangarData = GetRawValue(statData, '陆行舰.舰载机库', {});
+          const armamentCap = SafeGetValue(shipLevelInfo, '武器上限', 'N/A');
+          const hangarCap = SafeGetValue(shipLevelInfo, '载具上限', 'N/A');
+          // 新变量结构中，key 本身就是名称，不需要检查内部的 '名称' 字段
+          const armamentsCount = Object.keys(armamentsData).filter(k => k !== '$meta').length;
+          const hangarCount = Object.keys(hangarData).filter(k => k !== '$meta').length;
 
           // Create sections in reverse order of appearance, as insertBefore adds the new element at the beginning.
           // 1. Create Hangar section first.
           createExpandableItemSection(
-              `陆行舰机库 (${hangarCount} / ${hangarCap})`,
+              `舰载机库 (${hangarCount} / ${hangarCap})`,
               hangarData,
-              '陆行舰.陆行舰机库',
+              '陆行舰.舰载机库',
               statusGrid,
               shipSection
           );
 
           // 2. Create Armaments section second, so it appears before the Hangar.
           createExpandableItemSection(
-              `陆行舰载武装 (${armamentsCount} / ${armamentCap})`,
+              `舰载武装 (${armamentsCount} / ${armamentCap})`,
               armamentsData,
-              '陆行舰.陆行舰载武装',
+              '陆行舰.舰载武装',
               statusGrid,
               shipSection
           );
@@ -1825,17 +2045,11 @@
           // --- Dynamic Ship Sections ---
           const shipData = GetRawValue(statData, '陆行舰', {});
           const handledShipKeys = [
-            '陆行舰等级',
-            '能源核心',
-            '舰载AI',
+            '等级数据',
             '舰内设施',
             '$meta',
-            '陆行舰等级数据',
-            '舰上信息',
-            '人形武备库', // Will be handled inside '舰内资源'
-            '特殊物品库', // Will be handled inside '舰内资源'
-            '陆行舰载武装', // Handled separately
-            '陆行舰机库', // Handled separately
+            '舰载武装', // Handled separately
+            '舰载机库', // Handled separately
           ];
 
           for (const shipSectionName in shipData) {
@@ -1849,7 +2063,7 @@
             // Create the section container
             const sectionEl = document.createElement('div');
             sectionEl.className = 'section dynamic-ship-section'; // 添加用于清理的类
-            if (shipSectionName === '舰内资源') {
+            if (shipSectionName === '资源') {
               sectionEl.classList.add('ship-resources-section');
             }
             sectionEl.innerHTML = `
@@ -1859,13 +2073,13 @@
             const contentEl = sectionEl.querySelector('.section-content');
 
             // --- Armory Sub-Section (if this is the resources section) ---
-            if (shipSectionName === '舰内资源') {
-              const armoryData = GetRawValue(statData, '陆行舰.人形武备库', {});
+            if (shipSectionName === '资源') {
+              const armoryData = GetRawValue(statData, '陆行舰.资源.武备库', {});
               if (armoryData && typeof armoryData === 'object' && Object.keys(armoryData).filter(k => k !== '$meta').length > 0) {
                 const armoryContainer = document.createElement('div');
                 armoryContainer.style.marginTop = '15px';
                 armoryContainer.innerHTML = `
-                  <div class="section-header clickable" onclick="toggleSection(this)" style="font-size: 1.1em; border-top: 1px solid var(--border-color); padding-top: 10px;">人形武备库</div>
+                  <div class="section-header clickable" onclick="toggleSection(this)" style="font-size: 1.1em; border-top: 1px solid var(--border-color); padding-top: 10px;">武备库</div>
                   <div class="section-content" style="display: none; gap: 10px; padding-left: 10px;"></div>
                 `;
                 const armoryContentEl = armoryContainer.querySelector('.section-content');
@@ -1874,7 +2088,8 @@
                   if (!armoryData.hasOwnProperty(weaponKey) || weaponKey === '$meta') continue;
 
                   const weapon = armoryData[weaponKey];
-                  const weaponName = SafeGetValue(weapon, '名称', '未知武器');
+                  // 新变量结构中，key 本身就是武器名称
+                  const weaponName = weaponKey;
                   const weaponType = SafeGetValue(weapon, '类型', 'N/A');
                   const weaponLevel = SafeGetValue(weapon, '等级', 'N/A');
                   const weaponQty = SafeGetValue(weapon, '数量', 'N/A');
@@ -1882,7 +2097,7 @@
                   const weaponEl = document.createElement('div');
                   weaponEl.className = 'property';
                   weaponEl.style.cursor = 'pointer';
-                  const weaponPath = `陆行舰.人形武备库.${weaponKey}`;
+                  const weaponPath = `陆行舰.资源.武备库.${weaponKey}`;
                   weaponEl.setAttribute('onclick', `toggleItemDescription(this, '${weaponPath}')`);
                   weaponEl.innerHTML = `
                     <div class="property-name" style="text-transform: none;">${weaponName} <span style="color: var(--accent-highlight); font-size: 0.9em;">(Lv.${weaponLevel})</span></div>
@@ -1897,28 +2112,29 @@
               }
 
               // --- Special Items Sub-Section (if this is the resources section) ---
-              const specialItemsData = GetRawValue(statData, '陆行舰.特殊物品库', {});
+              const specialItemsData = GetRawValue(statData, '陆行舰.资源.物品库', {});
               if (specialItemsData && typeof specialItemsData === 'object' && Object.keys(specialItemsData).filter(k => k !== '$meta').length > 0) {
                 const specialItemsContainer = document.createElement('div');
                 specialItemsContainer.style.marginTop = '15px';
                 specialItemsContainer.innerHTML = `
-                  <div class="section-header clickable" onclick="toggleSection(this)" style="font-size: 1.1em; border-top: 1px solid var(--border-color); padding-top: 10px;">特殊物品库</div>
+                  <div class="section-header clickable" onclick="toggleSection(this)" style="font-size: 1.1em; border-top: 1px solid var(--border-color); padding-top: 10px;">物品库</div>
                   <div class="section-content" style="display: none; gap: 10px; padding-left: 10px;"></div>
                 `;
                 const specialItemsContentEl = specialItemsContainer.querySelector('.section-content');
 
                 for (const itemKey in specialItemsData) {
-                  if (!specialItemsData.hasOwnProperty(itemKey) || itemKey === '$meta' || SafeGetValue(specialItemsData[itemKey], '名称', '') === '') continue;
+                  if (!specialItemsData.hasOwnProperty(itemKey) || itemKey === '$meta') continue;
 
                   const item = specialItemsData[itemKey];
-                  const itemName = SafeGetValue(item, '名称', '未知物品');
+                  // 新变量结构中，key 本身就是物品名称
+                  const itemName = itemKey;
                   const itemType = SafeGetValue(item, '类型', 'N/A');
                   const itemQty = SafeGetValue(item, '数量', 'N/A');
 
                   const itemEl = document.createElement('div');
                   itemEl.className = 'property';
                   itemEl.style.cursor = 'pointer';
-                  const itemPath = `陆行舰.特殊物品库.${itemKey}`;
+                  const itemPath = `陆行舰.资源.物品库.${itemKey}`;
                   itemEl.setAttribute('onclick', `toggleItemDescription(this, '${itemPath}')`);
                   itemEl.innerHTML = `
                     <div class="property-name" style="text-transform: none;">${itemName} <span style="color: var(--accent-highlight); font-size: 0.9em;">(${itemType})</span></div>
@@ -1937,8 +2153,10 @@
             }
 
             // Populate the section content
+            // 资源 section 中，武备库和物品库已在上方特殊处理，需要排除
+            const skipSubSections = shipSectionName === '资源' ? ['武备库', '物品库', '$meta'] : ['$meta'];
             for (const propName in sectionData) {
-              if (!sectionData.hasOwnProperty(propName) || propName === '$meta') continue;
+              if (!sectionData.hasOwnProperty(propName) || skipSubSections.includes(propName)) continue;
 
               let propValue = GetRawValue(sectionData, propName);
 
@@ -1973,7 +2191,11 @@
                   contentEl.appendChild(itemEl);
                 });
               }
-              // Case 2: Simple key-value pair
+              // Case 2: Value is an object (skip, already handled or not a simple property)
+              else if (typeof propValue === 'object' && propValue !== null) {
+                continue;
+              }
+              // Case 3: Simple key-value pair
               else {
                 const propEl = document.createElement('div');
                 propEl.className = 'property';
@@ -1989,8 +2211,60 @@
             statusGrid.appendChild(sectionEl);
           }
 
+          // --- 关系列表（非人形角色） ---
+          const relationContainer = document.getElementById('relation-list-content');
+          const relationData = GetRawValue(statData, '关系列表', {});
+          relationContainer.innerHTML = '';
+          const relationKeys = Object.keys(relationData).filter(k => k !== '$meta');
+          if (relationKeys.length === 0) {
+            relationContainer.innerHTML = '<p style="color: var(--text-secondary); padding: 5px;">暂无关系记录。</p>';
+          } else {
+            relationKeys.forEach(charName => {
+              const charData = relationData[charName];
+              const identity = SafeGetValue(charData, '身份', 'N/A');
+              const bond = SafeGetValue(charData, '好感', '0');
+              const appearance = SafeGetValue(charData, '外貌', 'N/A');
+              const outfit = SafeGetValue(charData, '着装', 'N/A');
+              const personality = SafeGetValue(charData, '性格', 'N/A');
+
+              const el = document.createElement('div');
+              el.innerHTML = `
+                <div class="doll-header" onclick="toggleDollDetails(this)">${charName} <span style="color: var(--accent-highlight); font-size: 0.9em;">[${identity}]</span></div>
+                <div class="doll-content">
+                  <div class="property">
+                    <div class="property-name">好感</div>
+                    <div class="property-value-container">
+                      <span class="value-main">${bond}</span>
+                    </div>
+                  </div>
+                  <div class="property property-full-width">
+                    <div class="property-name" style="grid-area: name;">外貌</div>
+                    <div class="property-value-container value-container-right" style="grid-area: value;">
+                      <span class="value-description text-wrap" style="color: var(--text-primary);">${appearance}</span>
+                    </div>
+                  </div>
+                  <div class="property property-full-width">
+                    <div class="property-name" style="grid-area: name;">着装</div>
+                    <div class="property-value-container value-container-right" style="grid-area: value;">
+                      <span class="value-description text-wrap" style="color: var(--text-primary);">${outfit}</span>
+                    </div>
+                  </div>
+                  <div class="property property-full-width">
+                    <div class="property-name" style="grid-area: name;">性格</div>
+                    <div class="property-value-container value-container-right" style="grid-area: value;">
+                      <span class="value-description text-wrap" style="color: var(--text-primary);">${personality}</span>
+                    </div>
+                  </div>
+                </div>
+              `;
+              while (el.firstChild) {
+                relationContainer.appendChild(el.firstChild);
+              }
+            });
+          }
+
           // --- Doll Info ---
-          const dollList = GetRawValue(statData, '人形列表.圣柩人形', []);
+          const dollList = getDollListAsArray(statData);
           renderDollList(dollList);
 
 
@@ -2051,12 +2325,12 @@
         const dollListContainer = document.getElementById('interaction-doll-list');
         dollListContainer.innerHTML = ''; // Clear previous list
 
-        const dollList = GetRawValue(statDataCache, '人形列表.圣柩人形', []);
+        const dollList = getDollListAsArray(statDataCache);
         let hasDolls = false;
         if (Array.isArray(dollList) && dollList.length > 0) {
             dollList.forEach(dollData => {
                 if (typeof dollData !== 'object' || dollData === null) return;
-                const dollName = SafeGetValue(dollData, '代号', null);
+                const dollName = dollData._代号 || SafeGetValue(dollData, '代号', null);
                 if (!dollName) return;
                 hasDolls = true;
 
@@ -2089,14 +2363,14 @@
         const listContainer = document.getElementById('armaments-list');
         listContainer.innerHTML = ''; // Clear previous list
 
-        const items = GetRawValue(statDataCache, '陆行舰.陆行舰载武装', {});
+        const items = GetRawValue(statDataCache, '陆行舰.舰载武装', {});
         let hasItems = false;
         for (const key in items) {
             if (!items.hasOwnProperty(key) || key === '$meta') continue;
 
             const item = items[key];
-            const itemName = SafeGetValue(item, '名称', null);
-            if (!itemName || itemName.trim() === '') continue;
+            // 新变量结构中，key 本身就是名称
+            const itemName = key;
 
             hasItems = true;
             const itemButton = document.createElement('button');
@@ -2125,14 +2399,14 @@
         const listContainer = document.getElementById('hangar-list');
         listContainer.innerHTML = ''; // Clear previous list
 
-        const items = GetRawValue(statDataCache, '陆行舰.陆行舰机库', {});
+        const items = GetRawValue(statDataCache, '陆行舰.舰载机库', {});
         let hasItems = false;
         for (const key in items) {
             if (!items.hasOwnProperty(key) || key === '$meta') continue;
 
             const item = items[key];
-            const itemName = SafeGetValue(item, '名称', null);
-            if (!itemName || itemName.trim() === '') continue;
+            // 新变量结构中，key 本身就是名称
+            const itemName = key;
 
             hasItems = true;
             const itemButton = document.createElement('button');

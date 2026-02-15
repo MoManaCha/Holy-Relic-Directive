@@ -6,9 +6,10 @@
 
   <%_ {
   let dollList = getvar('stat_data.人形列表', { defaults: {} });
-
-  Object.entires(dollList).forEach(([name, doll])=>{
-    bondValue = doll.好感
+  if (dollList && typeof dollList === 'object') {
+  Object.entries(dollList).forEach(([name, doll]) => {
+    if (!doll || typeof doll !== 'object') return;
+    const bondValue = doll.好感 || 0;
   _%>
   <%= name %>:
     associated_variable: 羁绊深度 (<%= bondValue %>)
@@ -74,7 +75,8 @@
         - "对指挥官的占有欲会变得明显，会在意其他与指挥官关系过近的人，并用自己的方式宣示“主权”。"
     <%_ } _%>
     <%_
-      })
+      });
+    }
     }
     _%>
 </doll_bond_staged>

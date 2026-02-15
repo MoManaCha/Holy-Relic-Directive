@@ -562,44 +562,23 @@
         // SillyTavern API integration
         if (
           typeof triggerSlash !== 'undefined' &&
-          typeof setVariables !== 'undefined' &&
+          typeof insertOrAssignVariables !== 'undefined' &&
           typeof getCurrentMessageId !== 'undefined'
         ) {
           triggerSlash(`/send ${message}`);
           await new Promise(r => setTimeout(r, 200)); // Give ST a moment
 
           const messageId = await getCurrentMessageId();
-          const stat_data = {
-            commander_info: {
-              codename: commanderCodename,
-              gender: commanderGender,
-              origin: commanderOrigin,
-            },
-            doll_setup: {
-              personality_preference: personality,
-              combat_style_preference: combatStyle,
-              rarity: rarity,
-              abilities: {
-                tactical_execution: stat1,
-                frame_tenacity: stat2,
-                mental_stability: stat3,
-                environmental_adaptability: stat4,
-                growth_potential: stat5,
-              },
-            },
-            ship_ai: {
-              style: aiStyle,
-              name: aiName,
-            },
-          };
 
-          if (landshipName) {
-            stat_data.ship_info = { name: landshipName };
-          }
-
-          setVariables(messageId, {
-            srb_custom_start: stat_data,
-          });
+          // 设置 message 级变量：舰载AI数据，供 陆行舰-舰载AI.ejs 和状态栏读取
+          insertOrAssignVariables({
+            extraData: {
+              '舰载AI': {
+                '风格': aiStyle,
+                '名称': aiName,
+              }
+            }
+          }, { type: 'message', message_id: messageId });
 
           sendButton.textContent = '已发送!';
           setTimeout(() => {
