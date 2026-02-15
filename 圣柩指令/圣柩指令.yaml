@@ -1128,4 +1128,175 @@
 
           console.log('shengju-value-corrector.ts v5.0.0 loaded successfully.');
 
+    变量: {},
+
+      - 名称: 圣柩zod
+        id: fee7a4fb-9601-4dbb-9998-1a47b4ea8f70
+        启用: false
+        类型: 脚本
+        内容: |
+          import { registerMvuSchema } from 'https://testingcf.jsdelivr.net/gh/StageDog/tavern_resource/dist/util/mvu_zod.js';
+
+          // 定义可复用的 schema
+          const 效果Schema = z.record(z.string().describe('效果名'), z.string().prefault('')).prefault({});
+
+          const 装备Schema = z.object({
+            等级: z.string().prefault(''),
+            类型: z.string().prefault(''),
+            效果: 效果Schema,
+            描述: z.string().prefault(''),
+            位置: z.string().prefault(''),
+          }).prefault({ 等级: '', 类型: '', 效果: {}, 描述: '', 位置: '' });
+
+          const 技能Schema = z.object({
+            等级: z.string().prefault(''),
+            类型: z.string().prefault(''),
+            效果: 效果Schema,
+            描述: z.string().prefault(''),
+          }).prefault({ 等级: '', 类型: '', 效果: {}, 描述: '' });
+
+          const 人形技能Schema = z.object({
+            等级: z.string().prefault(''),
+            类型: z.string().prefault(''),
+            消耗: z.string().prefault(''),
+            效果: 效果Schema,
+            描述: z.string().prefault(''),
+          }).prefault({ 等级: '', 类型: '', 消耗: '', 效果: {}, 描述: '' });
+
+          // 主 Schema 定义
+          export const Schema = z.object({
+            时间: z.string().prefault(''),
+            地点: z.string().prefault(''),
+            天气: z.string().prefault(''),
+            纳米尘污染等级: z.string().prefault(''),
+
+            任务列表: z.record(z.string().describe('任务名称'), z.object({
+              类型: z.string().prefault(''),
+              简介: z.string().prefault(''),
+              目标: z.string().prefault(''),
+              奖励: z.string().prefault(''),
+            }).prefault({ 类型: '', 简介: '', 目标: '', 奖励: '' })).prefault({}),
+
+            主角: z.object({
+              功绩点: z.coerce.number().transform(v => Math.round(v)).prefault(0),
+              功绩排名: z.string().prefault(''),
+              最高功绩: z.coerce.number().transform(v => Math.round(v)).prefault(0),
+              评级: z.string().prefault(''),
+              任务完成数量: z.coerce.number().prefault(0),
+              属性: z.object({
+                交涉: z.coerce.number().prefault(0),
+                指挥: z.coerce.number().prefault(0),
+                瞄准: z.coerce.number().prefault(0),
+                智力: z.coerce.number().prefault(0),
+              }).prefault({ 交涉: 0, 指挥: 0, 瞄准: 0, 智力: 0 }),
+              技能: z.record(z.string().describe('技能名称'), 技能Schema).prefault({}),
+            }).prefault({
+              功绩点: 0,
+              功绩排名: '',
+              最高功绩: 0,
+              评级: '',
+              任务完成数量: 0,
+              属性: { 交涉: 0, 指挥: 0, 瞄准: 0, 智力: 0 },
+              技能: {},
+            }),
+
+            剧情进度: z.coerce.number().prefault(0),
+
+            陆行舰: z.object({
+              等级数据: z.record(z.string().describe('陆巡舰名称'), z.object({
+                陆巡舰等级: z.string().prefault(''),
+                设施最大数量: z.coerce.number().prefault(0),
+                设施等级上限: z.coerce.number().prefault(0),
+                武器上限: z.coerce.number().prefault(0),
+                载具上限: z.coerce.number().prefault(0),
+              }).prefault({ 陆巡舰等级: '', 设施最大数量: 0, 设施等级上限: 0, 武器上限: 0, 载具上限: 0 })).prefault({}),
+              舰内设施: z.record(z.string().describe('设施名称'), z.object({
+                等级: z.string().prefault(''),
+                效果: 效果Schema,
+                描述: z.string().prefault(''),
+              }).prefault({ 等级: '', 效果: {}, 描述: '' })).prefault({}),
+              舰载武装: z.record(z.string().describe('武装名称'), z.object({
+                等级: z.string().prefault(''),
+                类型: z.string().prefault(''),
+                效果: 效果Schema,
+                描述: z.string().prefault(''),
+                状态: z.string().prefault(''),
+              }).prefault({ 等级: '', 类型: '', 效果: {}, 描述: '', 状态: '' })).prefault({}),
+              舰载机库: z.record(z.string().describe('载具名称'), z.object({
+                等级: z.string().prefault(''),
+                类型: z.string().prefault(''),
+                装备: z.record(z.string().describe('装备名'), 装备Schema).prefault({}),
+                描述: z.string().prefault(''),
+                状态: z.string().prefault(''),
+              }).prefault({ 等级: '', 类型: '', 装备: {}, 描述: '', 状态: '' })).prefault({}),
+              资源: z.object({
+                物品库: z.record(z.string().describe('物品名称'), z.object({
+                  描述: z.string().prefault(''),
+                  类型: z.string().prefault(''),
+                  数量: z.coerce.number().prefault(0),
+                }).prefault({ 描述: '', 类型: '', 数量: 0 })).prefault({}),
+                武备库: z.record(z.string().describe('武器名称'), z.object({
+                  等级: z.string().prefault(''),
+                  类型: z.string().prefault(''),
+                  效果: 效果Schema,
+                  描述: z.string().prefault(''),
+                  数量: z.coerce.number().prefault(0),
+                }).prefault({ 等级: '', 类型: '', 效果: {}, 描述: '', 数量: 0 })).prefault({}),
+              }).prefault({ 物品库: {}, 武备库: {} }),
+            }).prefault({ 等级数据: {}, 舰内设施: {}, 舰载武装: {}, 舰载机库: {}, 资源: { 物品库: {}, 武备库: {} } }),
+
+            关系列表: z.record(z.string().describe('非人形角色名称'), z.object({
+              身份: z.string().prefault(''),
+              好感: z.coerce.number().prefault(0),
+              外貌: z.string().prefault(''),
+              着装: z.string().prefault(''),
+              性格: z.string().prefault(''),
+            }).prefault({ 身份: '', 好感: 0, 外貌: '', 着装: '', 性格: '' })).prefault({}),
+
+            人形列表: z.record(z.string().describe('代号'), z.object({
+              稀有度: z.string().prefault(''),
+              精神负荷: z.coerce.number().prefault(0),
+              好感: z.coerce.number().prefault(0),
+              外貌: z.string().prefault(''),
+              着装: z.string().prefault(''),
+              性格: z.string().prefault(''),
+              作战风格: z.string().prefault(''),
+              战损程度: z.string().prefault(''),
+              装备: z.record(z.string().describe('装备名'), 装备Schema).prefault({}),
+              技能: z.record(z.string().describe('技能名'), 人形技能Schema).prefault({}),
+              能力: z.object({
+                战术执行力: z.string().prefault(''),
+                素体韧性: z.string().prefault(''),
+                心智稳定度: z.string().prefault(''),
+                环境适应性: z.string().prefault(''),
+                成长潜质: z.string().prefault(''),
+              }).prefault({ 战术执行力: '', 素体韧性: '', 心智稳定度: '', 环境适应性: '', 成长潜质: '' }),
+            }).prefault({
+              稀有度: '', 精神负荷: 0, 好感: 0, 外貌: '', 着装: '', 性格: '', 作战风格: '', 战损程度: '', 装备: {}, 技能: {},
+              能力: { 战术执行力: '', 素体韧性: '', 心智稳定度: '', 环境适应性: '', 成长潜质: '' }
+            })).prefault({}),
+
+            资讯: z.object({
+              舰上信息: z.object({
+                人形日常: z.string().prefault(''),
+                最近战报: z.string().prefault(''),
+                AI建议: z.string().prefault(''),
+                指挥官动向: z.string().prefault(''),
+              }).prefault({ 人形日常: '', 最近战报: '', AI建议: '', 指挥官动向: '' }),
+              SRB公告: z.object({
+                附近威胁: z.string().prefault(''),
+                SRB调动: z.string().prefault(''),
+                高价通缉: z.string().prefault(''),
+                附近活动: z.string().prefault(''),
+              }).prefault({ 附近威胁: '', SRB调动: '', 高价通缉: '', 附近活动: '' }),
+            }).prefault({
+              舰上信息: { 人形日常: '', 最近战报: '', AI建议: '', 指挥官动向: '' },
+              SRB公告: { 附近威胁: '', SRB调动: '', 高价通缉: '', 附近活动: '' }
+            }),
+          });
+
+          $(() => {
+            registerMvuSchema(Schema);
+          });
+
     变量: {}
