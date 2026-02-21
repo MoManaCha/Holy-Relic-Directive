@@ -35,6 +35,7 @@ variables_update_rules:
       - 任务完成且领取奖励后直接删除该任务
   主角:
     功绩点:
+      note: 即MP
       type: number
       check:
         - 完成任务或达成特定成就时增加
