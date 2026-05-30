@@ -129,9 +129,9 @@ variables_update_rules:
           武器容量: number;
           机库已用容量: number;
           机库容量: number;
-          舰内设施: { [设施名称: string]: { 等级: string; 效果: { [k: string]: string }; 占容: number; 描述: string; 状态: string } };
+          舰内设施: { [设施名称: string]: { 等级: string; 类型: string; 效果: { [k: string]: string }; 占容: number; 描述: string; 状态: string } };
           舰载武装: { [武装名称: string]: { 等级: string; 类型: string; 射程: string; 射击次数: string; 威力: string; 效果: { [k: string]: string }; 占容: number; 描述: string; 状态: string } };
-          舰载机库: { [机库名称: string]: { 等级: string; 占容: number; 描述: string; 状态: string } };
+          舰载机库: { [机库名称: string]: { 等级: string; 类型: string; 占容: number; 描述: string; 状态: string } };
         }
       }
     check:
@@ -169,14 +169,50 @@ variables_update_rules:
       机库已用容量: *Occupied_space
       机库容量: *maximum_capacity
       舰内设施:
+        type: |-
+          {
+            [设施名称: string]: {
+              等级: string;
+              类型: string;
+              效果: { [效果名: string]: string };
+              占容: string;
+              描述: string;
+              状态: string;
+            }
+          }
         check:
           - 随设施建造、升级、损坏、修复或拆除更新
           - 不得超过陆行舰.设施容量和陆行舰.设施等级上限
       舰载武装:
+        type: |-
+          {
+            [武装名称: string]: {
+              等级: string;
+              类型: string;
+              射程: string;
+              射击次数: string;
+              威力: string;
+              效果: { [效果名: string]: string };
+              占容: string;
+              描述: string;
+              状态: string;
+            }
+          }
         check:
           - 随舰船武装安装、更换、损坏、修复或弹药状态变化更新
           - 不得超过陆行舰.武器容量
       舰载机库:
+        type: |-
+          {
+            [机库名称: string]: {
+              等级: string;
+              类型: string;
+              效果: { [效果名: string]: string };
+              占容: string;
+              描述: string;
+              状态: string;
+            }
+          }
         check:
           - 随舰船载具装载、替换、改装、损毁或修复更新
           - 所有载具已用容量合计不得超过陆行舰.机库容量
